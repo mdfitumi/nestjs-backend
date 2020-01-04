@@ -6,7 +6,7 @@ import {
   InstagramQuestTypeEntity,
 } from 'src/entities';
 import { Repository } from 'typeorm';
-import { CreateInstagramDto } from '../dto';
+import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
 
 @Injectable()
 export class InstagramStorageService {
@@ -30,5 +30,13 @@ export class InstagramStorageService {
 
   async getAccount(account: Partial<InstagramEntity>) {
     return this.instagramRepo.findOne(account);
+  }
+
+  async addCampaign(campaign: CreateInstagramCampaignDto) {
+    const entity = this.instagramCampaignRepo.create({
+      ...campaign,
+      workerId: 1,
+    });
+    return this.instagramCampaignRepo.save(entity);
   }
 }
