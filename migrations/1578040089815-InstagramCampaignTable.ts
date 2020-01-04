@@ -57,6 +57,7 @@ export class InstagramCampaignTable1578040089815 implements MigrationInterface {
           new TableColumn({
             name: 'updatedAt',
             type: 'timestamp with time zone',
+            isNullable: true,
           }),
         ],
       }),
