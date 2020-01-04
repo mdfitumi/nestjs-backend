@@ -19,9 +19,9 @@ export class UserEntity {
   displayName: string;
   @Column()
   picture: string;
-  @Column()
+  @Column({ type: 'json' })
   emails: any;
-  @Column()
+  @Column({ type: 'json' })
   roles: any;
   @OneToOne(
     () => UserEntity,

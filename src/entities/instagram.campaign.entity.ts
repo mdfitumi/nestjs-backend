@@ -8,7 +8,7 @@ export class InstagramCampaignEntity {
   id: number;
   @Column({ nullable: false, type: 'interval' })
   questExpireDuration: any;
-  @Column({ nullable: true, default: "'{}'::jsonb" })
+  @Column({ nullable: true, default: "'{}'::jsonb", type: 'json' })
   allowedHeroes?: any;
   @Column({ nullable: true })
   followersLowerBound?: number;
