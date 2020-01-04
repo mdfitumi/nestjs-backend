@@ -6,6 +6,8 @@ module.exports = {
   entities: [`${SOURCE_PATH}/**/**.entity{.ts,.js}`],
   synchronize: false,
   migrations: ['migrations/*.ts'],
+  migrationsRun: false,
+  cache: true,
   cli: {
     migrationsDir: 'migrations',
   },

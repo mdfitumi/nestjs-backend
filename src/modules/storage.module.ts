@@ -29,8 +29,9 @@ const ormConfig: TypeOrmModuleOptions | undefined =
           ServerEntity,
           UserEntity,
         ],
-        synchronize: false,
         migrations: ['migrations'],
+        synchronize: false,
+        cache: true,
       };
 @Module({
   imports: [
