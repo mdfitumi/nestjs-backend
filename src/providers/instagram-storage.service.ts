@@ -6,6 +6,7 @@ import {
   InstagramQuestTypeEntity,
 } from 'src/entities';
 import { Repository } from 'typeorm';
+import { CreateInstagramDto } from '../dto';
 
 @Injectable()
 export class InstagramStorageService {
@@ -18,8 +19,8 @@ export class InstagramStorageService {
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
   ) {}
 
-  async addAccount(username: string) {
-    const entity = this.instagramRepo.create({ username });
+  async addAccount(account: CreateInstagramDto) {
+    const entity = this.instagramRepo.create(account);
     return this.instagramRepo.save(entity);
   }
 
