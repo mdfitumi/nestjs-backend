@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { InstagramStorageService } from '../providers';
+import { InstagramActiveCampaignEntity } from '../entities/instagram.active-campaign.entity';
 import {
   InstagramCampaignEntity,
   InstagramQuestTypeEntity,
@@ -9,6 +10,16 @@ import {
   ServerEntity,
   UserEntity,
 } from '../entities';
+
+const entities = [
+  InstagramCampaignEntity,
+  InstagramQuestTypeEntity,
+  CurrencyEntity,
+  InstagramEntity,
+  ServerEntity,
+  UserEntity,
+  InstagramActiveCampaignEntity,
+];
 
 // nestjs cannot properly read ormconfig.js file, so db is not working
 const ormConfig: TypeOrmModuleOptions | undefined =
@@ -21,14 +32,7 @@ const ormConfig: TypeOrmModuleOptions | undefined =
         username: 'test',
         password: 'test',
         database: 'influence_cloud',
-        entities: [
-          InstagramCampaignEntity,
-          InstagramQuestTypeEntity,
-          CurrencyEntity,
-          InstagramEntity,
-          ServerEntity,
-          UserEntity,
-        ],
+        entities,
         migrations: ['migrations'],
         synchronize: false,
         cache: true,
@@ -36,14 +40,7 @@ const ormConfig: TypeOrmModuleOptions | undefined =
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormConfig),
-    TypeOrmModule.forFeature([
-      InstagramCampaignEntity,
-      InstagramQuestTypeEntity,
-      CurrencyEntity,
-      InstagramEntity,
-      ServerEntity,
-      UserEntity,
-    ]),
+    TypeOrmModule.forFeature(entities),
   ],
   providers: [InstagramStorageService],
   exports: [InstagramStorageService],
