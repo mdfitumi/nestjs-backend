@@ -1,0 +1,18 @@
+version: '3.1'
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    ports:
+      - 8003:80
+      - 443:443
+    volumes:
+      - ./docker/nginx/log/:/var/log/nginx/
+      - ./docker/nginx/localhost:/etc/nginx/sites-enabled/localhost
+      - ./www:/var/www/html
+    depends_on:
+      - redis
+  redis:
+    image: redis:4.0.14-alpine
+    ports:
+      - 6379:6379

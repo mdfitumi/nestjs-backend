@@ -25,4 +25,10 @@ export class InstagramController {
   async showCampaign(@Param('id') campaignId: number) {
     return this.instagramService.getCampaign(campaignId);
   }
+
+  @Get('/validate-campaign-subscription')
+  // tslint:disable-next-line: no-empty
+  validateCampaignSubscription() {
+    console.log('validateCampaignSubscription');
+  }
 }
