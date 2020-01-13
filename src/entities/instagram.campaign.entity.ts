@@ -16,6 +16,8 @@ export class InstagramCampaignEntity {
   postsLowerBound?: number;
   @Column({ nullable: false })
   workerId: number;
+  @Column({ nullable: false })
+  enabled: boolean;
   @Column({ default: 'now()' })
   createdAt: Date;
   @Column()
