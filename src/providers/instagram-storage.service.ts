@@ -39,4 +39,8 @@ export class InstagramStorageService {
     });
     return this.instagramCampaignRepo.save(entity);
   }
+
+  async getCampaign(campaignId: number) {
+    return this.instagramCampaignRepo.findOne(campaignId);
+  }
 }

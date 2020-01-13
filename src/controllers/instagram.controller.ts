@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Get, Param } from '@nestjs/common';
 import { InstagramStorageService } from '../providers';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
 
@@ -19,5 +19,10 @@ export class InstagramController {
   @Post('/campaign')
   async createCampaign(@Body() campaign: CreateInstagramCampaignDto) {
     return this.instagramService.addCampaign(campaign);
+  }
+
+  @Get('/campaign/:id')
+  async showCampaign(@Param('id') campaignId: number) {
+    return this.instagramService.getCampaign(campaignId);
   }
 }
