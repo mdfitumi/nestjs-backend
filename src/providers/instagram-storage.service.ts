@@ -7,6 +7,7 @@ import {
 } from 'src/entities';
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
+import { InstagramActiveCampaignEntity } from '../entities/instagram.active-campaign.entity';
 
 @Injectable()
 export class InstagramStorageService {
@@ -15,6 +16,10 @@ export class InstagramStorageService {
     private instagramRepo: Repository<InstagramEntity>,
     @InjectRepository(InstagramCampaignEntity)
     private instagramCampaignRepo: Repository<InstagramCampaignEntity>,
+    @InjectRepository(InstagramActiveCampaignEntity)
+    private instagramActiveCampaignRepo: Repository<
+      InstagramActiveCampaignEntity
+    >,
     @InjectRepository(InstagramQuestTypeEntity)
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
   ) {}
@@ -42,5 +47,9 @@ export class InstagramStorageService {
 
   async getCampaign(campaignId: number) {
     return this.instagramCampaignRepo.findOne(campaignId);
+  }
+
+  async getActiveCampaigns(workerId: number) {
+    return this.instagramActiveCampaignRepo.find({ workerId });
   }
 }
