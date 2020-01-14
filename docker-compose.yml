@@ -19,7 +19,7 @@ services:
   app:
     build:
       context: ./
+    ports:
+      - 3000:3000
     command:
       ['node', '--icu-data-dir=node_modules/full-icu', './dist/src/main.js']
-    depends_on:
-      - nginx

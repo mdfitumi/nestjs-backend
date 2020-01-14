@@ -3,7 +3,7 @@ upstream redis_upstream {
 }
 
 upstream backend_upstream {
-    server 192.168.0.104:3000;
+    server app:3000;
 }
 
 server {
