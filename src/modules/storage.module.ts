@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { IoredisModule } from '@mobizerg/nest-ioredis';
+import { parse } from 'url';
 import { InstagramStorageService } from '../providers';
-import { InstagramActiveCampaignEntity } from '../entities/instagram.active-campaign.entity';
 import {
   InstagramCampaignEntity,
   InstagramQuestTypeEntity,
@@ -9,6 +10,7 @@ import {
   InstagramEntity,
   ServerEntity,
   UserEntity,
+  InstagramActiveCampaignEntity,
 } from '../entities';
 
 const entities = [
@@ -41,6 +43,9 @@ const ormConfig: TypeOrmModuleOptions | undefined =
   imports: [
     TypeOrmModule.forRoot(ormConfig),
     TypeOrmModule.forFeature(entities),
+    IoredisModule.register({
+      host: '192.168.0.104',
+    }),
   ],
   providers: [InstagramStorageService],
   exports: [InstagramStorageService],

@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRedis } from '@mobizerg/nest-ioredis';
+import { Redis } from 'ioredis';
 import {
   InstagramEntity,
   InstagramCampaignEntity,
   InstagramQuestTypeEntity,
+  InstagramActiveCampaignEntity,
 } from 'src/entities';
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
-import { InstagramActiveCampaignEntity } from '../entities/instagram.active-campaign.entity';
 
 @Injectable()
 export class InstagramStorageService {
@@ -22,6 +24,8 @@ export class InstagramStorageService {
     >,
     @InjectRepository(InstagramQuestTypeEntity)
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
+    @InjectRedis()
+    private redis: Redis,
   ) {}
 
   async addAccount(account: CreateInstagramDto) {
@@ -51,5 +55,10 @@ export class InstagramStorageService {
 
   async getActiveCampaigns(workerId: number) {
     return this.instagramActiveCampaignRepo.find({ workerId });
+  }
+
+  async publishCampaignQuest(campaignId: number, quest: string) {
+    console.log(arguments);
+    return await this.redis.publish(`channel:/campaign:${campaignId}`, quest);
   }
 }
