@@ -32,9 +32,9 @@ server {
         proxy_set_header X-Forwarded-For $remote_addr;
     }
 
-    location = /instagram/campaign/subsribe {
+    location = /instagram/quests/subsribe {
         nchan_subscriber;
-        nchan_channel_id $arg_id;
+        nchan_channel_id $arg_campaignId;
         nchan_authorize_request /instagram/campaign/subsribe/auth;
         nchan_redis_pass redis_upstream;
         nchan_use_redis on;
@@ -42,7 +42,7 @@ server {
 
     location = /pub {
         nchan_publisher;
-        nchan_channel_id $arg_id;
+        nchan_channel_id $arg_campaignId;
         nchan_redis_pass redis_upstream;
         nchan_use_redis on;
     }
