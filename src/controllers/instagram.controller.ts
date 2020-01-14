@@ -1,6 +1,10 @@
 import { Controller, Post, Body, Delete, Get, Param } from '@nestjs/common';
 import { InstagramStorageService } from '../providers';
-import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
+import {
+  CreateInstagramDto,
+  CreateInstagramCampaignDto,
+  PublishInstagramCampaignQuestDto,
+} from '../dto';
 
 @Controller('instagram')
 export class InstagramController {
@@ -21,6 +25,15 @@ export class InstagramController {
     return this.instagramService.addCampaign(campaign);
   }
 
+  @Post('/campaign/quest')
+  async publishCampaignQuest(@Body() req: PublishInstagramCampaignQuestDto) {
+    console.log('publishCampaignQuest');
+    return this.instagramService.publishCampaignQuest(
+      req.campaignId,
+      req.quest,
+    );
+  }
+
   @Get('/campaign/:id')
   async showCampaign(@Param('id') campaignId: number) {
     return this.instagramService.getCampaign(campaignId);
@@ -30,5 +43,6 @@ export class InstagramController {
   // tslint:disable-next-line: no-empty
   validateCampaignSubscription() {
     console.log('validateCampaignSubscription');
+    return '';
   }
 }

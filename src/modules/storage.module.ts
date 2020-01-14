@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { IoredisModule } from '@mobizerg/nest-ioredis';
-import { parse } from 'url';
 import { InstagramStorageService } from '../providers';
+import { NchanService } from '../providers/nchan.service';
 import {
   InstagramCampaignEntity,
   InstagramQuestTypeEntity,
@@ -47,7 +47,7 @@ const ormConfig: TypeOrmModuleOptions | undefined =
       host: '192.168.0.104',
     }),
   ],
-  providers: [InstagramStorageService],
+  providers: [InstagramStorageService, NchanService],
   exports: [InstagramStorageService],
 })
 export class StorageModule {}
