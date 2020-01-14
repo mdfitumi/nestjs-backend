@@ -2,9 +2,9 @@ FROM node:13-alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-
 RUN npm i -g @nestjs/cli
+
+COPY package*.json ./
 
 RUN npm ci --only=production
 
