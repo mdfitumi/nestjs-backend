@@ -15,7 +15,7 @@ const PUBSUB_MSGPACKED_SIZE_CUTOFF = 0;
 const OPTIMIZE_TARGET = 0;
 
 @Injectable()
-export class NchanService {
+export class QuestPublisherService {
   private readonly msgpack = msgpack();
   constructor(
     @InjectRedis()

@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NchanService } from './nchan.service';
+import { QuestPublisherService } from './quest-publisher.service';
 
 describe('NchanService', () => {
-  let service: NchanService;
+  let service: QuestPublisherService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [NchanService],
+      providers: [QuestPublisherService],
     }).compile();
 
-    service = module.get<NchanService>(NchanService);
+    service = module.get<QuestPublisherService>(QuestPublisherService);
   });
 
   it('should be defined', () => {

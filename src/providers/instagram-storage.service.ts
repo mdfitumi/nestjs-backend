@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InjectRedis } from '@mobizerg/nest-ioredis';
-import { Redis } from 'ioredis';
 import {
   InstagramEntity,
   InstagramCampaignEntity,
@@ -10,7 +8,7 @@ import {
 } from 'src/entities';
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
-import { NchanService } from './nchan.service';
+import { QuestPublisherService } from './quest-publisher.service';
 
 @Injectable()
 export class InstagramStorageService {
@@ -25,7 +23,7 @@ export class InstagramStorageService {
     >,
     @InjectRepository(InstagramQuestTypeEntity)
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
-    private readonly publisher: NchanService,
+    private readonly publisher: QuestPublisherService,
   ) {}
 
   async addAccount(account: CreateInstagramDto) {
