@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import axios from 'axios';
 import { InjectRedis } from '@mobizerg/nest-ioredis';
 import { Redis } from 'ioredis';
+import * as msgpack from 'msgpack5';
 
 const NCHAN_PUBLISH_COMMAND = 'nchan_publish';
 const NUM_KEYS = 11;
@@ -14,18 +15,14 @@ const PUBSUB_MSGPACKED_SIZE_CUTOFF = 0;
 const OPTIMIZE_TARGET = 0;
 
 @Injectable()
-export class NchanService implements OnModuleInit {
+export class NchanService {
+  private readonly msgpack = msgpack();
   constructor(
     @InjectRedis()
     private redis: Redis,
   ) {}
-  onModuleInit() {
-    this.redis.defineCommand(NCHAN_PUBLISH_COMMAND, {
-      numberOfKeys: 11,
-      lua: NCHAN_REDIS_PUBLISH_SCRIPT,
-    });
-  }
   publishCampaignQuest(campaignId: number, quest: string) {
+    const channelId = `{channel:/${campaignId}}:pubsub`;
     // return this.redis.send_command(
     //   NCHAN_PUBLISH_COMMAND,
     //   'ic',
@@ -33,21 +30,50 @@ export class NchanService implements OnModuleInit {
     //   '',
     //   quest,
     // );
-    return this.redis.eval(
-      NCHAN_REDIS_PUBLISH_SCRIPT,
-      NUM_KEYS,
-      NAMESPACE,
-      campaignId,
-      String(new Date().getTime()).slice(0, 10),
+    // return this.redis.eval(
+    //   NCHAN_REDIS_PUBLISH_SCRIPT,
+    //   NUM_KEYS,
+    //   NAMESPACE,
+    //   campaignId,
+    //   String(new Date().getTime()).slice(0, 10),
+    //   quest,
+    //   'application/json',
+    //   EVENTSOURCE_EVENT,
+    //   COMPRESSION_SETTING,
+    //   TTL,
+    //   MSG_BUF_MAX_SIZE,
+    //   PUBSUB_MSGPACKED_SIZE_CUTOFF,
+    //   OPTIMIZE_TARGET,
+    // );
+    const now = String(new Date().getTime()).slice(0, 10);
+    // const msg = {
+    //   content_type: 'application/json',
+    //   data: 'quest',
+    //   time: now,
+    //   eventsource_event: '',
+    //   ttl: 300,
+    //   prev_time: 0,
+    //   prev_tag: 0,
+    //   tag: 0,
+    // };
+    // const msg = {
+    //   message: 'quest',
+    //   time: now,
+    //   tag: 0,
+    // };
+    const msg = [
+      'ch+msg',
+      channelId,
+      300,
+      Number(now),
+      0,
+      0,
+      0,
       quest,
       'application/json',
-      EVENTSOURCE_EVENT,
-      COMPRESSION_SETTING,
-      TTL,
-      MSG_BUF_MAX_SIZE,
-      PUBSUB_MSGPACKED_SIZE_CUTOFF,
-      OPTIMIZE_TARGET,
-    );
+    ];
+    const encoded = this.msgpack.encode(msg);
+    return this.redis.publishBuffer(channelId, encoded.slice());
   }
 
   publishCampaignQuest2(campaignId: number, quest: string) {

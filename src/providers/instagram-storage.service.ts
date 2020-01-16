@@ -10,6 +10,7 @@ import {
 } from 'src/entities';
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
+import { NchanService } from './nchan.service';
 
 @Injectable()
 export class InstagramStorageService {
@@ -24,8 +25,7 @@ export class InstagramStorageService {
     >,
     @InjectRepository(InstagramQuestTypeEntity)
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
-    @InjectRedis()
-    private redis: Redis,
+    private readonly publisher: NchanService,
   ) {}
 
   async addAccount(account: CreateInstagramDto) {
@@ -59,6 +59,8 @@ export class InstagramStorageService {
 
   async publishCampaignQuest(campaignId: number, quest: string) {
     console.log(arguments);
-    return await this.redis.publish(`channel:/campaign:${campaignId}`, quest);
+    await this.publisher
+      .publishCampaignQuest(campaignId, quest)
+      .then(result => console.log(`publish result ${result}`));
   }
 }
