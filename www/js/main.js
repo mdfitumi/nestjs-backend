@@ -10,7 +10,7 @@ var opt = {
   //only 1 running subscriber is allowed per url per window/tab.
 };
 
-var sub = new NchanSubscriber('/instagram/campaign/subsribe?id=2', opt);
+var sub = new NchanSubscriber('/instagram/quests/subsribe?campaignId=4', opt);
 
 sub.on('transportSetup', function(opt, subscriberName) {
   // opt is a hash/object - not all transports support all options equally. Only longpoll supports arbitrary headers
@@ -55,7 +55,7 @@ sub.on('disconnect', function(evt) {
 
 sub.on('error', function(error_code, error_description) {
   //error callback
-  console.error('error', error_code, error_description);
+  console.error(error_code, error_description);
 });
 
 sub.reconnect; // should subscriber try to reconnect? true by default.
