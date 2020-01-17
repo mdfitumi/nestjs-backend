@@ -41,7 +41,7 @@ export class RedisService {
     const redis = this.factory.create();
     return concat(
       defer(() => redis.subscribe(channelId)).pipe(ignoreElements()),
-      fromEvent<InstagramQuestEntity>(redis, channelId),
+      fromEvent<InstagramQuestEntity>(redis, 'message'),
     );
   }
 }
