@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@mobizerg/nest-ioredis';
 import { Redis } from 'ioredis';
 import { InstagramQuestEntity } from '../entities';
-import { Observable, fromEvent } from 'rxjs';
+import { Observable, fromEvent, concat, defer } from 'rxjs';
 import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
+import { ignoreElements } from 'rxjs/operators';
 
 @Injectable()
 export class RedisService {
@@ -34,13 +35,13 @@ export class RedisService {
     );
   }
 
-  async getInstagramQuests(
-    campaignId: number,
-  ): Promise<Observable<InstagramQuestEntity>> {
+  getInstagramQuests(campaignId: number): Observable<InstagramQuestEntity> {
     this.logger.debug(`getInstagramQuests ${campaignId}`);
     const channelId = RedisService.createCampaignQuestsChannelName(campaignId);
     const redis = this.factory.create();
-    await redis.subscribe(channelId);
-    return fromEvent<InstagramQuestEntity>(redis, channelId);
+    return concat(
+      defer(() => redis.subscribe(channelId)).pipe(ignoreElements()),
+      fromEvent<InstagramQuestEntity>(redis, channelId),
+    );
   }
 }

@@ -11,6 +11,8 @@ import { RedisService } from './redis.service';
 import { InstagramQuestEntity } from 'src/entities/instagram-quest.entity';
 import { CampaignQuestsDto } from '../dto/campaign-quests.dto';
 
+const QUESTS_EVENT_NAME = 'quests';
+
 @WebSocketGateway()
 export class InstagramQuestsService {
   constructor(
@@ -20,16 +22,16 @@ export class InstagramQuestsService {
     this.logger.setContext('InstagramQuestsService');
   }
 
-  @SubscribeMessage('quests')
-  async onEvent(
+  @SubscribeMessage(QUESTS_EVENT_NAME)
+  onEvent(
     @MessageBody() msg: CampaignQuestsDto,
-  ): Promise<Observable<WsResponse<InstagramQuestEntity>>> {
+  ): Observable<WsResponse<InstagramQuestEntity>> {
     const channelId = RedisService.createCampaignQuestsChannelName(
       msg.campaignId,
     );
     this.logger.debug(`onEvent quests ${channelId}`);
     return this.redis
       .getInstagramQuests(msg.campaignId)
-      .then(_ => _.pipe(map(quest => ({ event: channelId, data: quest }))));
+      .pipe(map(quest => ({ event: QUESTS_EVENT_NAME, data: quest })));
   }
 }
