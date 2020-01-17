@@ -3,6 +3,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { IoredisModule } from '@mobizerg/nest-ioredis';
 import { LoggerModule } from './logger.module';
 import { RedisService } from '../providers/redis.service';
+import { RedisFactoryService } from '../providers/redis-factory.service';
+import { RedisOptions } from 'ioredis';
 
 @Module({
   imports: [
@@ -11,7 +13,16 @@ import { RedisService } from '../providers/redis.service';
     }),
     LoggerModule,
   ],
-  providers: [RedisService],
-  exports: [RedisService],
+  providers: [
+    RedisService,
+    {
+      provide: 'REDIS_OPTIONS',
+      useValue: {
+        host: '192.168.0.104',
+      } as RedisOptions,
+    },
+    RedisFactoryService,
+  ],
+  exports: [RedisService, RedisFactoryService],
 })
 export class RedisModule {}

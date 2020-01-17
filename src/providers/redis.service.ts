@@ -4,11 +4,13 @@ import { Redis } from 'ioredis';
 import { InstagramQuestEntity } from '../entities';
 import { Observable, fromEvent } from 'rxjs';
 import { IcLogger } from './logger';
+import { RedisFactoryService } from './redis-factory.service';
 
 @Injectable()
 export class RedisService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
+    private readonly factory: RedisFactoryService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('RedisService');
@@ -37,7 +39,8 @@ export class RedisService {
   ): Promise<Observable<InstagramQuestEntity>> {
     this.logger.debug(`getInstagramQuests ${campaignId}`);
     const channelId = RedisService.createCampaignQuestsChannelName(campaignId);
-    await this.redis.subscribe(channelId);
-    return fromEvent<InstagramQuestEntity>(this.redis, channelId);
+    const redis = this.factory.create();
+    await redis.subscribe(channelId);
+    return fromEvent<InstagramQuestEntity>(redis, channelId);
   }
 }
