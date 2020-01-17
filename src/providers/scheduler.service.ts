@@ -13,7 +13,7 @@ export class SchedulerService implements OnModuleInit {
     this.logger.setContext('SchedulerService');
   }
   onModuleInit() {
-    this.tick();
+    // this.tick();
   }
 
   async tick() {
@@ -22,13 +22,9 @@ export class SchedulerService implements OnModuleInit {
       this.WORKER_ID,
     );
     if (campaigns.length > 0) {
-      console.log(`Got ${campaigns.length} active campaigns`);
-      campaigns.forEach(c => {
-        this.instagramStorage
-          .publishCampaignQuest(c.id, 'hello from scheduler')
-          .catch(console.error);
-      });
+      this.logger.debug(`tick: Got ${campaigns.length} active campaigns`);
+      // campaigns.forEach(async c => {});
     }
-    setTimeout(() => this.tick(), this.SCHEDULER_TICK_INTERVAL);
+    // setTimeout(() => this.tick(), this.SCHEDULER_TICK_INTERVAL);
   }
 }

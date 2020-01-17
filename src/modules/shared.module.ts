@@ -1,8 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { IoredisModule } from '@mobizerg/nest-ioredis';
-import { InstagramStorageService } from '../providers';
-import { LoggerModule } from './logger.module';
 import {
   InstagramCampaignEntity,
   InstagramQuestTypeEntity,
@@ -39,6 +37,8 @@ const ormConfig: TypeOrmModuleOptions | undefined =
         synchronize: false,
         cache: true,
       };
+
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormConfig),
@@ -46,9 +46,6 @@ const ormConfig: TypeOrmModuleOptions | undefined =
     IoredisModule.register({
       host: '192.168.0.104',
     }),
-    LoggerModule,
   ],
-  providers: [InstagramStorageService],
-  exports: [InstagramStorageService],
 })
-export class StorageModule {}
+export class SharedModule {}

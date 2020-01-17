@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Delete, Get, Param } from '@nestjs/common';
 import { InstagramStorageService } from '../providers';
 import { IcLogger } from '../providers/logger';
+import { RedisService } from '../providers/redis.service';
 import {
   CreateInstagramDto,
   CreateInstagramCampaignDto,
@@ -11,6 +12,7 @@ import {
 export class InstagramController {
   constructor(
     private readonly instagramService: InstagramStorageService,
+    private readonly redis: RedisService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('InstagramController');
@@ -37,10 +39,7 @@ export class InstagramController {
   @Post('/campaign/quest')
   async publishCampaignQuest(@Body() req: PublishInstagramCampaignQuestDto) {
     this.logger.debug('publishCampaignQuest');
-    return this.instagramService.publishCampaignQuest(
-      req.campaignId,
-      req.quest,
-    );
+    return this.redis.publishCampaignQuest(req.campaignId, req.quest);
   }
 
   @Get('/campaign/:id')

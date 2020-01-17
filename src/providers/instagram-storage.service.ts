@@ -8,7 +8,6 @@ import {
 } from 'src/entities';
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
-import { QuestPublisherService } from './quest-publisher.service';
 import { IcLogger } from './logger';
 
 @Injectable()
@@ -24,7 +23,6 @@ export class InstagramStorageService {
     >,
     @InjectRepository(InstagramQuestTypeEntity)
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
-    private readonly publisher: QuestPublisherService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('InstagramStorageService');
@@ -63,11 +61,5 @@ export class InstagramStorageService {
   async getActiveCampaigns(workerId: number) {
     this.logger.debug(`getActiveCampaigns ${workerId.toString()}`);
     return this.instagramActiveCampaignRepo.find({ workerId });
-  }
-
-  async publishCampaignQuest(campaignId: number, quest: string) {
-    await this.publisher
-      .publishCampaignQuest(campaignId, quest)
-      .then(result => console.log(`publish result ${result}`));
   }
 }
