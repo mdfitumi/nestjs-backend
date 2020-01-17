@@ -27,6 +27,7 @@ export class InstagramQuestsService {
     const channelId = RedisService.createCampaignQuestsChannelName(
       msg.campaignId,
     );
+    this.logger.debug(`onEvent quests ${channelId}`);
     return this.redis
       .getInstagramQuests(msg.campaignId)
       .then(_ => _.pipe(map(quest => ({ event: channelId, data: quest }))));
