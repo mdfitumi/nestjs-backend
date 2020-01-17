@@ -23,13 +23,13 @@ export class InstagramQuestsService {
   }
 
   @SubscribeMessage(QUESTS_EVENT_NAME)
-  onEvent(
+  onCampaignQuestSubscription(
     @MessageBody() msg: CampaignQuestsDto,
   ): Observable<WsResponse<InstagramQuestEntity>> {
     const channelId = RedisService.createCampaignQuestsChannelName(
       msg.campaignId,
     );
-    this.logger.debug(`onEvent quests ${channelId}`);
+    this.logger.debug(`onCampaignQuestSubscription ${channelId}`);
     return this.redis
       .getInstagramQuests(msg.campaignId)
       .pipe(map(quest => ({ event: QUESTS_EVENT_NAME, data: quest })));
