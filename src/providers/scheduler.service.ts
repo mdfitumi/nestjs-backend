@@ -1,16 +1,23 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InstagramStorageService } from './instagram-storage.service';
+import { IcLogger } from './logger';
 
 @Injectable()
 export class SchedulerService implements OnModuleInit {
   private readonly SCHEDULER_TICK_INTERVAL = 10000;
   private readonly WORKER_ID = 1;
-  constructor(private readonly instagramStorage: InstagramStorageService) {}
+  constructor(
+    private readonly instagramStorage: InstagramStorageService,
+    private readonly logger: IcLogger,
+  ) {
+    this.logger.setContext('SchedulerService');
+  }
   onModuleInit() {
     this.tick();
   }
 
   async tick() {
+    this.logger.debug('tick');
     const campaigns = await this.instagramStorage.getActiveCampaigns(
       this.WORKER_ID,
     );

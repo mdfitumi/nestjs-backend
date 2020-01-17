@@ -9,6 +9,7 @@ import {
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
 import { QuestPublisherService } from './quest-publisher.service';
+import { IcLogger } from './logger';
 
 @Injectable()
 export class InstagramStorageService {
@@ -24,22 +25,29 @@ export class InstagramStorageService {
     @InjectRepository(InstagramQuestTypeEntity)
     private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
     private readonly publisher: QuestPublisherService,
-  ) {}
+    private readonly logger: IcLogger,
+  ) {
+    this.logger.setContext('InstagramStorageService');
+  }
 
   async addAccount(account: CreateInstagramDto) {
+    this.logger.debug(`addAccount ${JSON.stringify(account)}`);
     const entity = this.instagramRepo.create(account);
     return this.instagramRepo.save(entity);
   }
 
   async deleteAccount(account: Partial<InstagramEntity>) {
+    this.logger.debug(`deleteAccount ${JSON.stringify(account)}`);
     return this.instagramRepo.delete(account);
   }
 
   async getAccount(account: Partial<InstagramEntity>) {
+    this.logger.debug(`getAccount ${JSON.stringify(account)}`);
     return this.instagramRepo.findOne(account);
   }
 
   async addCampaign(campaign: CreateInstagramCampaignDto) {
+    this.logger.debug(`addCampaign ${JSON.stringify(campaign)}`);
     const entity = this.instagramCampaignRepo.create({
       ...campaign,
       workerId: 1,
@@ -48,15 +56,16 @@ export class InstagramStorageService {
   }
 
   async getCampaign(campaignId: number) {
+    this.logger.debug(`getCampaign ${campaignId.toString()}`);
     return this.instagramCampaignRepo.findOne(campaignId);
   }
 
   async getActiveCampaigns(workerId: number) {
+    this.logger.debug(`getActiveCampaigns ${workerId.toString()}`);
     return this.instagramActiveCampaignRepo.find({ workerId });
   }
 
   async publishCampaignQuest(campaignId: number, quest: string) {
-    console.log(arguments);
     await this.publisher
       .publishCampaignQuest(campaignId, quest)
       .then(result => console.log(`publish result ${result}`));

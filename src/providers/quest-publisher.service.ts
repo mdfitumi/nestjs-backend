@@ -3,6 +3,7 @@ import axios from 'axios';
 import { InjectRedis } from '@mobizerg/nest-ioredis';
 import { Redis } from 'ioredis';
 import * as msgpack from 'msgpack5';
+import { IcLogger } from './logger';
 
 const NCHAN_PUBLISH_COMMAND = 'nchan_publish';
 const NUM_KEYS = 11;
@@ -20,8 +21,12 @@ export class QuestPublisherService {
   constructor(
     @InjectRedis()
     private redis: Redis,
-  ) {}
+    private readonly logger: IcLogger,
+  ) {
+    this.logger.setContext('QuestPublisherService');
+  }
   publishCampaignQuest(campaignId: number, quest: string) {
+    this.logger.debug(`publishCampaignQuest ${campaignId}, ${quest}`);
     const channelId = `{channel:/${campaignId}}:pubsub`;
     // return this.redis.send_command(
     //   NCHAN_PUBLISH_COMMAND,
@@ -62,7 +67,7 @@ export class QuestPublisherService {
     //   tag: 0,
     // };
     const msg = [
-      'ch+msg',
+      `ch+msg`,
       channelId,
       300,
       Number(now),
