@@ -4,17 +4,30 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EnvConfig } from '../interfaces';
 import { ConfigModuleOptions } from '../modules';
+import { CONFIG_OPTIONS } from '../modules/config.module';
 
 @Injectable()
 export class ConfigService {
   private readonly envConfig: EnvConfig;
 
-  constructor(@Inject('CONFIG_OPTIONS') private options: ConfigModuleOptions) {
-    const filePath = `.${process.env.NODE_ENV || 'development'}.env`;
-    const envFile = path.resolve(__dirname, '../../', options.folder, filePath);
-    this.envConfig = (dotenv.parse(
-      fs.readFileSync(envFile),
-    ) as unknown) as EnvConfig;
+  constructor(@Inject(CONFIG_OPTIONS) private options: ConfigModuleOptions) {
+    this.envConfig = ConfigService.readConfig(
+      options.folder,
+      ConfigService.envFileName,
+    );
+  }
+
+  public static get envFileName() {
+    return `.${process.env.NODE_ENV || 'development'}.env`;
+  }
+
+  public static readConfig(folder: string, filePath: string) {
+    const envFile = path.resolve(__dirname, '../../', folder, filePath);
+    return (dotenv.parse(fs.readFileSync(envFile)) as unknown) as EnvConfig;
+  }
+
+  public static readConfigDefault() {
+    return ConfigService.readConfig('../', ConfigService.envFileName);
   }
 
   getByKey(key: string): string {

@@ -1,20 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRedis } from '@mobizerg/nest-ioredis';
-import { Redis } from 'ioredis';
+import { Redis, RedisOptions } from 'ioredis';
 import { InstagramQuestEntity } from '../entities';
 import { Observable, fromEvent, concat, defer } from 'rxjs';
 import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
 import { ignoreElements } from 'rxjs/operators';
+import { parse } from 'url';
 
 @Injectable()
 export class RedisService {
+  private readonly redis: Redis;
   constructor(
-    @InjectRedis() private readonly redis: Redis,
     private readonly factory: RedisFactoryService,
     private readonly logger: IcLogger,
   ) {
+    this.redis = this.factory.create();
     this.logger.setContext('RedisService');
+  }
+
+  public static parseOptions(options: string): RedisOptions {
+    const redisOptions = parse(options);
+    let redisPass: string = '';
+    if (redisOptions.auth) {
+      redisPass = redisOptions.auth.split(':')[1];
+    }
+
+    return {
+      host: redisOptions.hostname!!,
+      port: Number(redisOptions.port),
+      password: redisPass,
+    };
   }
 
   static createCampaignChannelName(campaignId: number) {

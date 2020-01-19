@@ -2,11 +2,13 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Redis, RedisOptions } from 'ioredis';
 import * as IORedis from 'ioredis';
 import { IcLogger } from './logger';
+import { ConfigService } from './config.service';
+import { RedisService } from './redis.service';
 
 @Injectable()
 export class RedisFactoryService {
   constructor(
-    @Inject('REDIS_OPTIONS') private readonly options: RedisOptions,
+    private readonly config: ConfigService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('RedisFactoryService');
@@ -14,6 +16,6 @@ export class RedisFactoryService {
 
   create(): Redis {
     this.logger.debug('create');
-    return new IORedis(this.options);
+    return new IORedis(RedisService.parseOptions(this.config.env.REDIS_URL));
   }
 }

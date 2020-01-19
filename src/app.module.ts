@@ -22,5 +22,6 @@ import {
   ],
   controllers: [AppController, InstagramController, AuthController],
   providers: [AppService],
+  exports: [ConfigModule],
 })
 export class AppModule {}
