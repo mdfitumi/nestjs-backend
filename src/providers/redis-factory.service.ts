@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { Redis, RedisOptions } from 'ioredis';
+import { Injectable } from '@nestjs/common';
+import { Redis } from 'ioredis';
 import * as IORedis from 'ioredis';
 import { IcLogger } from './logger';
 import { ConfigService } from './config.service';
