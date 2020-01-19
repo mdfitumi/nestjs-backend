@@ -43,9 +43,6 @@ const ormConfig: TypeOrmModuleOptions | undefined =
   imports: [
     TypeOrmModule.forRoot(ormConfig),
     TypeOrmModule.forFeature(entities),
-    IoredisModule.register({
-      host: '192.168.0.104',
-    }),
     LoggerModule,
   ],
   providers: [InstagramStorageService],
