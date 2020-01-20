@@ -5,7 +5,7 @@ import { RedisService } from './redis.service';
 
 @Injectable()
 export class SchedulerService implements OnModuleInit {
-  private readonly SCHEDULER_TICK_INTERVAL = 10000;
+  private readonly SCHEDULER_TICK_INTERVAL = 20000;
   private readonly WORKER_ID = 1;
   constructor(
     private readonly instagramStorage: InstagramStorageService,
@@ -27,7 +27,7 @@ export class SchedulerService implements OnModuleInit {
       this.logger.debug(`tick: Got ${campaigns.length} active campaigns`);
       campaigns.forEach(c =>
         this.redis.publishCampaignQuest(c.id, {
-          expireDuration: '3 seconds',
+          expireDurationSeconds: 3,
           type: { id: 1, typeName: 'post_message' },
         }),
       );

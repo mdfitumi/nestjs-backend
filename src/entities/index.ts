@@ -5,4 +5,3 @@ export * from './public.instagram.entity';
 export * from './public.server.entity';
 export * from './public.user.entity';
 export * from './instagram.active-campaign.entity';
-export * from './instagram-quest.entity';

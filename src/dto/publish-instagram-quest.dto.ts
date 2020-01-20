@@ -1,5 +1,5 @@
-import { InstagramQuestEntity } from '../entities/instagram-quest.entity';
+import { InstagramQuest } from '../interfaces';
 export class PublishInstagramCampaignQuestDto {
   campaignId: number;
-  quest: InstagramQuestEntity;
+  quest: InstagramQuest;
 }

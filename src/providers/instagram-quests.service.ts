@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { IcLogger } from './logger';
 import { RedisService } from './redis.service';
-import { InstagramQuestEntity } from 'src/entities/instagram-quest.entity';
+import { InstagramQuest } from 'src/interfaces';
 import { CampaignQuestsDto } from '../dto/campaign-quests.dto';
 
 const QUESTS_EVENT_NAME = 'quests';
@@ -25,7 +25,7 @@ export class InstagramQuestsService {
   @SubscribeMessage(QUESTS_EVENT_NAME)
   onCampaignQuestSubscription(
     @MessageBody() msg: CampaignQuestsDto,
-  ): Observable<WsResponse<InstagramQuestEntity>> {
+  ): Observable<WsResponse<InstagramQuest>> {
     const channelId = RedisService.createCampaignQuestsChannelName(
       msg.campaignId,
     );
