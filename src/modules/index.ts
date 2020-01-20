@@ -5,3 +5,4 @@ export * from './storage.module';
 export * from './quests.module';
 export * from './redis.module';
 export * from './config.module';
+export * from './default-config.module';

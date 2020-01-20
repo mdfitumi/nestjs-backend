@@ -3,6 +3,9 @@ import { DynamicModule, Module, Global } from '@nestjs/common';
 import { ConfigService } from '../providers/config.service';
 
 export const CONFIG_OPTIONS = 'CONFIG_OPTIONS';
+export const DEFAULT_CONFIG_MODULE_OPTIONS: ConfigModuleOptions = {
+  folder: '../',
+};
 
 export interface ConfigModuleOptions {
   folder: string;

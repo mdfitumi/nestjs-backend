@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InstagramController, AuthController } from './controllers';
-import { ConfigModule } from './modules/config.module';
+import { DefaultConfigModule } from './modules/default-config.module';
 import {
   SchedulerModule,
   LoggerModule,
@@ -18,10 +18,9 @@ import {
     LoggerModule,
     QuestsModule,
     RedisModule,
-    ConfigModule.register({ folder: '../' }),
+    DefaultConfigModule,
   ],
   controllers: [AppController, InstagramController, AuthController],
   providers: [AppService],
-  exports: [ConfigModule],
 })
 export class AppModule {}
