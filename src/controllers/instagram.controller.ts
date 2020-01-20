@@ -1,13 +1,22 @@
-import { Controller, Post, Body, Delete, Get, Param } from '@nestjs/common';
-import { InstagramStorageService } from '../providers';
+import {
+  Controller,
+  Post,
+  Body,
+  Delete,
+  Get,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import { InstagramStorageService, RedisService } from '../providers';
 import { IcLogger } from '../providers/logger';
-import { RedisService } from '../providers/redis.service';
 import {
   CreateInstagramDto,
   CreateInstagramCampaignDto,
   PublishInstagramCampaignQuestDto,
 } from '../dto';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('instagram')
 export class InstagramController {
   constructor(
