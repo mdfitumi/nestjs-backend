@@ -5,6 +5,6 @@ export interface EnvConfig {
   AUTH0_CLIENT_ID: string;
   AUTH0_CLIENT_SECRET: string;
   AUTH0_CALLBACK_URL: string;
-  SERVICE_AUD: string;
+  AUTH0_AUDIENCE: string;
   SERVICE_SECRET: string;
 }

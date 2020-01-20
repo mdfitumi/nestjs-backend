@@ -5,6 +5,6 @@ import { ConfigService } from './providers/config.service';
 export class AppService {
   constructor(private readonly config: ConfigService) {}
   getHello(): string {
-    return `Hello ${this.config.env.SERVICE_AUD}!`;
+    return `Hello ${this.config.env.AUTH0_AUDIENCE}!`;
   }
 }
