@@ -9,4 +9,10 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('profile')
+  getProfile(@Req() req: Request) {
+    return req.user;
+  }
 }
