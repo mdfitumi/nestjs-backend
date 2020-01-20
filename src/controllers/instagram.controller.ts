@@ -13,6 +13,7 @@ import {
   CreateInstagramDto,
   CreateInstagramCampaignDto,
   PublishInstagramCampaignQuestDto,
+  SubmitQuestDto,
 } from '../dto';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -49,6 +50,12 @@ export class InstagramController {
   async publishCampaignQuest(@Body() req: PublishInstagramCampaignQuestDto) {
     this.logger.debug('publishCampaignQuest');
     return this.redis.publishCampaignQuest(req.campaignId, req.quest);
+  }
+
+  @Post('/campaign/quest/complete')
+  async campaignQuestComplete(@Body() req: SubmitQuestDto) {
+    this.logger.debug('campaignQuestComplete');
+    return this.redis.validateQuestSubmit(req.questId);
   }
 
   @Get('/campaign/:id')

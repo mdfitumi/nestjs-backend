@@ -6,6 +6,7 @@ import { RedisFactoryService } from './redis-factory.service';
 import { ignoreElements } from 'rxjs/operators';
 import { parse } from 'url';
 import { InstagramQuest } from '../interfaces';
+import * as uuid from 'uuid-random';
 
 @Injectable()
 export class RedisService {
@@ -40,13 +41,24 @@ export class RedisService {
     return `campaign_quests:${campaignId}`;
   }
 
-  publishCampaignQuest(campaignId: number, quest: InstagramQuest) {
+  static createQuestExpirationKey(questId: string) {
+    return `quest:${questId}:waiting`;
+  }
+
+  async publishCampaignQuest(campaignId: number, quest: InstagramQuest) {
     this.logger.debug(
       `publishCampaignQuest ${campaignId} ${JSON.stringify(quest)}`,
     );
+    const questId = uuid();
+    await this.redis.set(
+      RedisService.createQuestExpirationKey(questId),
+      1,
+      'EX',
+      quest.expireDurationSeconds,
+    );
     return this.redis.publish(
       RedisService.createCampaignQuestsChannelName(campaignId),
-      JSON.stringify(quest),
+      JSON.stringify({ questId, ...quest }),
     );
   }
 
@@ -58,5 +70,17 @@ export class RedisService {
       defer(() => redis.subscribe(channelId)).pipe(ignoreElements()),
       fromEvent<InstagramQuest>(redis, 'message'),
     );
+  }
+
+  async validateQuestSubmit(questId: string) {
+    const expirationKey = RedisService.createQuestExpirationKey(questId);
+    const isWaiting = await this.redis.get(expirationKey);
+    if (!isWaiting) {
+      this.logger.debug(`validateQuestSubmit ${questId} expired`);
+      return 'expired';
+    }
+    this.logger.debug(`validateQuestSubmit ${questId} ok`);
+    await this.redis.del(expirationKey);
+    return 'ok';
   }
 }
