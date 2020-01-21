@@ -5,7 +5,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 })
 export class CurrencyEntity {
   @PrimaryColumn()
-  id: number;
+  id: string;
   @Column({ nullable: false })
   template: string;
 }
