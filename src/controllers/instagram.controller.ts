@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { InstagramStorageService, RedisService } from '../providers';
 import { IcLogger } from '../providers/logger';
@@ -16,6 +17,9 @@ import {
   SubmitQuestDto,
 } from '../dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import { AuthzJwtPayload } from '../interfaces/authz-jwt-payload';
+import { InstagramQuestAssignDto } from '../dto/instagram-quest-assign.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('instagram')
@@ -52,10 +56,24 @@ export class InstagramController {
     return this.redis.publishCampaignQuest(req.campaignId, req.quest);
   }
 
+  @Post('/campaign/quest/assign')
+  async campaignQuestAssign(@Req() req: Request) {
+    this.logger.debug('campaignQuestAssign');
+    const body = req.body as InstagramQuestAssignDto;
+    const user = req.user as AuthzJwtPayload;
+    await this.redis.assignQuest(body.questId, user);
+  }
+
   @Post('/campaign/quest/complete')
-  async campaignQuestComplete(@Body() req: SubmitQuestDto) {
+  async campaignQuestComplete(@Req() req: Request) {
     this.logger.debug('campaignQuestComplete');
-    return this.redis.validateQuestSubmit(req.questId);
+    const body = req.body as SubmitQuestDto;
+    const user = req.user as AuthzJwtPayload;
+    const isQuestOwner = await this.redis.isQuestOwner(user, body.questId);
+    if (isQuestOwner) {
+      return this.redis.validateQuestSubmit(body.questId);
+    }
+    throw new Error('not quest owner');
   }
 
   @Get('/campaign/:id')

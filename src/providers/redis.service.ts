@@ -5,7 +5,7 @@ import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
 import { ignoreElements } from 'rxjs/operators';
 import { parse } from 'url';
-import { InstagramQuest } from '../interfaces';
+import { InstagramQuest, AuthzClientId } from '../interfaces';
 import * as uuid from 'uuid-random';
 
 @Injectable()
@@ -45,6 +45,10 @@ export class RedisService {
     return `quest:${questId}:waiting`;
   }
 
+  static createUserQuestsKey(user: AuthzClientId, questId: string) {
+    return `hero:${user.azp}:quest:${questId}`;
+  }
+
   async publishCampaignQuest(campaignId: number, quest: InstagramQuest) {
     this.logger.debug(
       `publishCampaignQuest ${campaignId} ${JSON.stringify(quest)}`,
@@ -52,7 +56,7 @@ export class RedisService {
     const questId = uuid();
     await this.redis.set(
       RedisService.createQuestExpirationKey(questId),
-      1,
+      JSON.stringify(quest),
       'EX',
       quest.expireDurationSeconds,
     );
@@ -82,5 +86,31 @@ export class RedisService {
     this.logger.debug(`validateQuestSubmit ${questId} ok`);
     await this.redis.del(expirationKey);
     return 'ok';
+  }
+
+  async assignQuest(questId: string, user: AuthzClientId) {
+    const questString = await this.redis.get(
+      RedisService.createQuestExpirationKey(questId),
+    );
+    if (!questString) {
+      throw new Error('quest does not exists');
+    }
+    const isAssigned = await this.isQuestOwner(user, questId);
+    if (isAssigned) {
+      throw new Error('quest already assigned');
+    }
+    const quest = JSON.parse(questString) as InstagramQuest;
+    return this.redis.set(
+      RedisService.createUserQuestsKey(user, questId),
+      '1',
+      'EX',
+      quest.expireDurationSeconds,
+    );
+  }
+
+  async isQuestOwner(user: AuthzClientId, questId: string) {
+    return this.redis
+      .get(RedisService.createUserQuestsKey(user, questId))
+      .then(flag => flag === '1');
   }
 }

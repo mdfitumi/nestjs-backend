@@ -8,6 +8,8 @@ export interface AuthzJwtPayload {
   gty: string;
 }
 
+export type AuthzClientId = Pick<AuthzJwtPayload, 'azp'>;
+
 /*
 {
   "iss": "https://smmtool.eu.auth0.com/",
