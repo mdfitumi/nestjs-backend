@@ -63,6 +63,19 @@ export class InstagramRedisService {
     );
   }
 
+  getUnassignedQuestKeys(): Observable<string> {
+    const redis = this.factory.create();
+    return concat(
+      defer(() => redis.config('SET', 'notify-keyspace-events', 'Ex')).pipe(
+        ignoreElements(),
+      ),
+      defer(() => redis.psubscribe('__keyevent@*__:expired')).pipe(
+        ignoreElements(),
+      ),
+      fromEvent<string>(redis, 'message').pipe(filter(_ => _.endsWith(':wfa'))),
+    );
+  }
+
   async validateQuestSubmit(questId: string) {
     const expirationKey = InstagramRedisService.createQuestExpirationKey(
       questId,
