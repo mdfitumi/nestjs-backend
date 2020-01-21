@@ -21,6 +21,7 @@ export class PublicStorageService {
 
   async addAccount(account: CreateUserDto) {
     this.logger.debug(`addAccount ${JSON.stringify(account)}`);
+    account.roles = [];
     const entity = this.usersRepo.create(account);
     return this.usersRepo.save(entity);
   }

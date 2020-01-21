@@ -49,7 +49,7 @@ export class UserEntity {
   @JoinColumn({ name: 'currencyId' })
   currency: CurrencyEntity;
   @Column()
-  currencyId: number;
+  currencyId: string;
   @Column()
   language: string;
   @Column()

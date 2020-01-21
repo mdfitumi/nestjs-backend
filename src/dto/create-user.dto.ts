@@ -5,8 +5,8 @@ export class CreateUserDto {
   picture: string;
   emails: any;
   roles: any;
-  referrer?: UserEntity;
-  referrerId: number;
+  referrerId?: number;
+  currencyId: string;
   cloudpaymentsToken: string;
   insolvent: boolean;
   auth0id: string;
