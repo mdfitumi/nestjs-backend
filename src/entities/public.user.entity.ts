@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity({
-  name: 'public.user',
+  name: 'public.users',
 })
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -43,7 +43,7 @@ export class UserEntity {
     default: "now() + '2 days'::interval",
   })
   trialEndsAt: Date;
-  @Column()
+  @Column({ default: false })
   trialActivated: boolean;
   @OneToOne(() => CurrencyEntity)
   @JoinColumn({ name: 'currencyId' })

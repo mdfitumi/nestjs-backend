@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { IoredisModule } from '@mobizerg/nest-ioredis';
-import { InstagramStorageService } from '../providers';
+import { InstagramStorageService, PublicStorageService } from '../providers';
 import { LoggerModule } from './logger.module';
 import {
   InstagramCampaignEntity,
@@ -45,7 +44,7 @@ const ormConfig: TypeOrmModuleOptions | undefined =
     TypeOrmModule.forFeature(entities),
     LoggerModule,
   ],
-  providers: [InstagramStorageService],
-  exports: [InstagramStorageService],
+  providers: [InstagramStorageService, PublicStorageService],
+  exports: [InstagramStorageService, PublicStorageService],
 })
 export class StorageModule {}
