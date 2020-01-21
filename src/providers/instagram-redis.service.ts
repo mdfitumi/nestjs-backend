@@ -65,20 +65,12 @@ export class InstagramRedisService {
     const channelId = InstagramRedisService.createCampaignQuestsChannelName(
       campaignId,
     );
-    const redis = this.factory.create();
-    return subscribeToEvents(redis, channelId);
+    return subscribeToEvents(this.factory, channelId);
   }
 
-  getUnassignedQuestKeys(): Observable<string> {
-    const redis = this.factory.create();
-    return concat(
-      defer(() => redis.config('SET', 'notify-keyspace-events', 'Ex')).pipe(
-        ignoreElements(),
-      ),
-      subscribeToEventsPattern<string>(redis, '__keyevent@*__:expired').pipe(
-        filter(_ => _.endsWith(':wfa')),
-      ),
-    );
+  getUnassignedQuestKeys(): Observable<number | string> {
+    this.logger.debug('getUnassignedQuestKeys');
+    return subscribeToEvents(this.factory, '__keyevent@0__:expired');
   }
 
   async validateQuestSubmit(questId: string) {

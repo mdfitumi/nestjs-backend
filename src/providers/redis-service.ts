@@ -18,9 +18,10 @@ export abstract class RedisService {
 }
 
 export function subscribeToEvents<T>(
-  redis: Redis,
+  factory: RedisFactoryService,
   redisKey: string,
 ): Observable<T> {
+  const redis = factory.create();
   return concat(
     defer(() => redis.subscribe(redisKey)).pipe(ignoreElements()),
     fromEvent<T>(redis, 'message'),
