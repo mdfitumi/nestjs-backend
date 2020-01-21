@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { Observable, fromEvent, concat, defer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
-import { ignoreElements, map, filter } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { InstagramQuest, AuthzClientId } from '../interfaces';
 import * as uuid from 'uuid-random';
-import {
-  RedisService,
-  subscribeToEvents,
-  subscribeToEventsPattern,
-} from './redis-service';
+import { subscribeToEvents, subscribeToEventsPattern } from './redis-service';
 
 @Injectable()
 export class InstagramRedisService {
   private readonly redis: Redis;
+  private readonly expired$ = subscribeToEvents<string[]>(
+    this.factory,
+    '__keyevent@0__:expired',
+  ).pipe(map(_ => _[1]));
   constructor(
     private readonly factory: RedisFactoryService,
     private readonly logger: IcLogger,
@@ -68,9 +68,12 @@ export class InstagramRedisService {
     return subscribeToEvents(this.factory, channelId);
   }
 
-  getUnassignedQuestKeys(): Observable<number | string> {
+  getUnassignedQuestKeys(): Observable<string> {
     this.logger.debug('getUnassignedQuestKeys');
-    return subscribeToEvents(this.factory, '__keyevent@0__:expired');
+    return this.expired$.pipe(
+      filter(_ => _.endsWith(':wfa')),
+      map(_ => _.split(':')[1]),
+    );
   }
 
   async validateQuestSubmit(questId: string) {
