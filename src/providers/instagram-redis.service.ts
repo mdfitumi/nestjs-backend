@@ -3,9 +3,14 @@ import { Redis } from 'ioredis';
 import { Observable, fromEvent, concat, defer } from 'rxjs';
 import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
-import { ignoreElements } from 'rxjs/operators';
+import { ignoreElements, map, filter } from 'rxjs/operators';
 import { InstagramQuest, AuthzClientId } from '../interfaces';
 import * as uuid from 'uuid-random';
+import {
+  RedisService,
+  subscribeToEvents,
+  subscribeToEventsPattern,
+} from './redis-service';
 
 @Injectable()
 export class InstagramRedisService {
@@ -26,8 +31,12 @@ export class InstagramRedisService {
     return `campaign_quests:${campaignId}`;
   }
 
-  static createQuestExpirationKey(questId: string) {
-    return `quest:${questId}:waiting`;
+  static createWaitingForAssignKey(questId: string) {
+    return `quest:${questId}:wfa`;
+  }
+
+  static createWaitingForCompleteKey(questId: string) {
+    return `quest:${questId}:wfc`;
   }
 
   static createUserQuestsKey(user: AuthzClientId, questId: string) {
@@ -40,7 +49,7 @@ export class InstagramRedisService {
     );
     const questId = uuid();
     await this.redis.set(
-      InstagramRedisService.createQuestExpirationKey(questId),
+      InstagramRedisService.createWaitingForAssignKey(questId),
       JSON.stringify(quest),
       'EX',
       quest.expireDurationSeconds,
@@ -66,15 +75,14 @@ export class InstagramRedisService {
       defer(() => redis.config('SET', 'notify-keyspace-events', 'Ex')).pipe(
         ignoreElements(),
       ),
-      defer(() => redis.psubscribe('__keyevent@*__:expired')).pipe(
-        ignoreElements(),
+      subscribeToEventsPattern<string>(redis, '__keyevent@*__:expired').pipe(
+        filter(_ => _.endsWith(':wfa')),
       ),
-      fromEvent<string>(redis, 'message').pipe(filter(_ => _.endsWith(':wfa'))),
     );
   }
 
   async validateQuestSubmit(questId: string) {
-    const expirationKey = InstagramRedisService.createQuestExpirationKey(
+    const expirationKey = InstagramRedisService.createWaitingForAssignKey(
       questId,
     );
     const isWaiting = await this.redis.get(expirationKey);
@@ -89,7 +97,7 @@ export class InstagramRedisService {
 
   async assignQuest(questId: string, user: AuthzClientId) {
     const questString = await this.redis.get(
-      InstagramRedisService.createQuestExpirationKey(questId),
+      InstagramRedisService.createWaitingForAssignKey(questId),
     );
     if (!questString) {
       throw new Error('quest does not exists');
