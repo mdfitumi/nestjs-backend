@@ -21,7 +21,7 @@ export class UserEntity {
   picture: string;
   @Column({ type: 'json' })
   emails: any;
-  @Column({ type: 'json' })
+  @Column({ type: 'json', default: "'[]'::jsonb" })
   roles: any;
   @OneToOne(
     () => UserEntity,
