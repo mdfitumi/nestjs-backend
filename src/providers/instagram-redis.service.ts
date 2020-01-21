@@ -57,10 +57,7 @@ export class InstagramRedisService {
       campaignId,
     );
     const redis = this.factory.create();
-    return concat(
-      defer(() => redis.subscribe(channelId)).pipe(ignoreElements()),
-      fromEvent<InstagramQuest>(redis, 'message'),
-    );
+    return subscribeToEvents(redis, channelId);
   }
 
   getUnassignedQuestKeys(): Observable<string> {

@@ -16,3 +16,23 @@ export abstract class RedisService {
     };
   }
 }
+
+export function subscribeToEvents<T>(
+  redis: Redis,
+  redisKey: string,
+): Observable<T> {
+  return concat(
+    defer(() => redis.subscribe(redisKey)).pipe(ignoreElements()),
+    fromEvent<T>(redis, 'message'),
+  );
+}
+
+export function subscribeToEventsPattern<T>(
+  redis: Redis,
+  redisKeyPattern: string,
+): Observable<T> {
+  return concat(
+    defer(() => redis.psubscribe(redisKeyPattern)).pipe(ignoreElements()),
+    fromEvent<T>(redis, 'message'),
+  );
+}
