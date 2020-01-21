@@ -96,9 +96,10 @@ export class InstagramRedisService {
   }
 
   async assignQuest(questId: string, user: AuthzClientId) {
-    const questString = await this.redis.get(
-      InstagramRedisService.createWaitingForAssignKey(questId),
+    const assignWaitingKey = InstagramRedisService.createWaitingForAssignKey(
+      questId,
     );
+    const questString = await this.redis.get(assignWaitingKey);
     if (!questString) {
       throw new Error('quest does not exists');
     }
@@ -106,6 +107,7 @@ export class InstagramRedisService {
     if (isAssigned) {
       throw new Error('quest already assigned');
     }
+    await this.redis.del(assignWaitingKey);
     const quest = JSON.parse(questString) as InstagramQuest;
     return this.redis.set(
       InstagramRedisService.createUserQuestsKey(user, questId),
