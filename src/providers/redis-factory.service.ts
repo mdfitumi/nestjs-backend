@@ -3,7 +3,7 @@ import { Redis } from 'ioredis';
 import * as IORedis from 'ioredis';
 import { IcLogger } from './logger';
 import { ConfigService } from './config.service';
-import { RedisService } from './redis.service';
+import { RedisService } from './redis-service';
 
 @Injectable()
 export class RedisFactoryService {

@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Redis, RedisOptions } from 'ioredis';
+import { Redis } from 'ioredis';
 import { Observable, fromEvent, concat, defer } from 'rxjs';
 import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
 import { ignoreElements } from 'rxjs/operators';
-import { parse } from 'url';
 import { InstagramQuest, AuthzClientId } from '../interfaces';
 import * as uuid from 'uuid-random';
 
 @Injectable()
-export class RedisService {
+export class InstagramRedisService {
   private readonly redis: Redis;
   constructor(
     private readonly factory: RedisFactoryService,
@@ -17,20 +16,6 @@ export class RedisService {
   ) {
     this.redis = this.factory.create();
     this.logger.setContext('RedisService');
-  }
-
-  public static parseOptions(options: string): RedisOptions {
-    const redisOptions = parse(options);
-    let redisPass: string = '';
-    if (redisOptions.auth) {
-      redisPass = redisOptions.auth.split(':')[1];
-    }
-
-    return {
-      host: redisOptions.hostname!!,
-      port: Number(redisOptions.port),
-      password: redisPass,
-    };
   }
 
   static createCampaignChannelName(campaignId: number) {
@@ -55,20 +40,22 @@ export class RedisService {
     );
     const questId = uuid();
     await this.redis.set(
-      RedisService.createQuestExpirationKey(questId),
+      InstagramRedisService.createQuestExpirationKey(questId),
       JSON.stringify(quest),
       'EX',
       quest.expireDurationSeconds,
     );
     return this.redis.publish(
-      RedisService.createCampaignQuestsChannelName(campaignId),
+      InstagramRedisService.createCampaignQuestsChannelName(campaignId),
       JSON.stringify({ questId, ...quest }),
     );
   }
 
   getInstagramQuests(campaignId: number): Observable<InstagramQuest> {
     this.logger.debug(`getInstagramQuests ${campaignId}`);
-    const channelId = RedisService.createCampaignQuestsChannelName(campaignId);
+    const channelId = InstagramRedisService.createCampaignQuestsChannelName(
+      campaignId,
+    );
     const redis = this.factory.create();
     return concat(
       defer(() => redis.subscribe(channelId)).pipe(ignoreElements()),
@@ -77,7 +64,9 @@ export class RedisService {
   }
 
   async validateQuestSubmit(questId: string) {
-    const expirationKey = RedisService.createQuestExpirationKey(questId);
+    const expirationKey = InstagramRedisService.createQuestExpirationKey(
+      questId,
+    );
     const isWaiting = await this.redis.get(expirationKey);
     if (!isWaiting) {
       this.logger.debug(`validateQuestSubmit ${questId} expired`);
@@ -90,7 +79,7 @@ export class RedisService {
 
   async assignQuest(questId: string, user: AuthzClientId) {
     const questString = await this.redis.get(
-      RedisService.createQuestExpirationKey(questId),
+      InstagramRedisService.createQuestExpirationKey(questId),
     );
     if (!questString) {
       throw new Error('quest does not exists');
@@ -101,7 +90,7 @@ export class RedisService {
     }
     const quest = JSON.parse(questString) as InstagramQuest;
     return this.redis.set(
-      RedisService.createUserQuestsKey(user, questId),
+      InstagramRedisService.createUserQuestsKey(user, questId),
       '1',
       'EX',
       quest.expireDurationSeconds,
@@ -110,7 +99,7 @@ export class RedisService {
 
   async isQuestOwner(user: AuthzClientId, questId: string) {
     return this.redis
-      .get(RedisService.createUserQuestsKey(user, questId))
+      .get(InstagramRedisService.createUserQuestsKey(user, questId))
       .then(flag => flag === '1');
   }
 }

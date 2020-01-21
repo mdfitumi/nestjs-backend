@@ -8,7 +8,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { InstagramStorageService, RedisService } from '../providers';
+import { InstagramStorageService, InstagramRedisService } from '../providers';
 import { IcLogger } from '../providers/logger';
 import {
   CreateInstagramDto,
@@ -26,7 +26,7 @@ import { InstagramQuestAssignDto } from '../dto/instagram-quest-assign.dto';
 export class InstagramController {
   constructor(
     private readonly instagramService: InstagramStorageService,
-    private readonly redis: RedisService,
+    private readonly redis: InstagramRedisService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('InstagramController');

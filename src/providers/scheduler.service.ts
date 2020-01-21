@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InstagramStorageService } from './instagram-storage.service';
 import { IcLogger } from './logger';
-import { RedisService } from './redis.service';
+import { InstagramRedisService } from './instagram-redis.service';
 
 @Injectable()
 export class SchedulerService implements OnModuleInit {
@@ -9,7 +9,7 @@ export class SchedulerService implements OnModuleInit {
   private readonly WORKER_ID = 1;
   constructor(
     private readonly instagramStorage: InstagramStorageService,
-    private readonly redis: RedisService,
+    private readonly redis: InstagramRedisService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('SchedulerService');

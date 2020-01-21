@@ -7,7 +7,7 @@ import {
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { IcLogger } from './logger';
-import { RedisService } from './redis.service';
+import { InstagramRedisService } from './instagram-redis.service';
 import { InstagramQuest } from 'src/interfaces';
 import { CampaignQuestsDto } from '../dto/campaign-quests.dto';
 
@@ -16,7 +16,7 @@ const QUESTS_EVENT_NAME = 'quests';
 @WebSocketGateway()
 export class InstagramQuestsService {
   constructor(
-    private readonly redis: RedisService,
+    private readonly redis: InstagramRedisService,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('InstagramQuestsService');
@@ -26,7 +26,7 @@ export class InstagramQuestsService {
   onCampaignQuestSubscription(
     @MessageBody() msg: CampaignQuestsDto,
   ): Observable<WsResponse<InstagramQuest>> {
-    const channelId = RedisService.createCampaignQuestsChannelName(
+    const channelId = InstagramRedisService.createCampaignQuestsChannelName(
       msg.campaignId,
     );
     this.logger.debug(`onCampaignQuestSubscription ${channelId}`);
