@@ -20,7 +20,7 @@ export class InstagramRedisService {
     private readonly logger: IcLogger,
   ) {
     this.redis = this.factory.create();
-    this.logger.setContext('RedisService');
+    this.logger.setContext('InstagramRedisService');
   }
 
   static createCampaignChannelName(campaignId: number) {
