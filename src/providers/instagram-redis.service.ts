@@ -8,6 +8,8 @@ import { InstagramQuest, AuthzClientId } from '../interfaces';
 import * as uuid from 'uuid-random';
 import { subscribeToEvents, subscribeToEventsPattern } from './redis-service';
 
+const REDIS_HOUR = 60 * 60;
+
 @Injectable()
 export class InstagramRedisService {
   private readonly redis: Redis;
@@ -84,7 +86,7 @@ export class InstagramRedisService {
       subscriptionId,
     );
     const old = await this.redis.incr(key);
-    await this.redis.expire(key, 60 * 60 * 24);
+    await this.redis.expire(key, REDIS_HOUR * 24);
     return old;
   }
   async getSubscriptionSentQuestsCount(subscriptionId: string) {
@@ -130,6 +132,9 @@ export class InstagramRedisService {
     const isCompletedKey = InstagramRedisService.createWaitingForCompleteKey(
       questId,
     );
+    const assignedQuestsCountKey = InstagramRedisService.createAssignedQuestsCountKey(
+      subscriptionId,
+    );
     const isCompleted = await this.redis
       .get(isCompletedKey)
       .then(flag => flag === '1');
@@ -148,7 +153,8 @@ export class InstagramRedisService {
     await this.redis
       .pipeline()
       .del(assignWaitingKey)
-      .incr(InstagramRedisService.createAssignedQuestsCountKey(subscriptionId))
+      .incr(assignedQuestsCountKey)
+      .expire(assignedQuestsCountKey, REDIS_HOUR * 24)
       .set(
         InstagramRedisService.createUserQuestsKey(user, questId),
         '1',
