@@ -4,12 +4,21 @@ import {
   MessageBody,
   WsResponse,
 } from '@nestjs/websockets';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import {
+  map,
+  tap,
+  scan,
+  filter,
+  mapTo,
+  mergeMap,
+  takeUntil,
+} from 'rxjs/operators';
+import { Observable, timer, merge, from, concat, of } from 'rxjs';
+import * as uuid from 'uuid-random';
 import { IcLogger } from './logger';
 import { InstagramRedisService } from './instagram-redis.service';
-import { InstagramQuest } from 'src/interfaces';
 import { CampaignQuestsDto } from '../dto/campaign-quests.dto';
+import { SchedulerService } from './scheduler.service';
 
 const QUESTS_EVENT_NAME = 'quests';
 
@@ -25,13 +34,42 @@ export class InstagramQuestsService {
   @SubscribeMessage(QUESTS_EVENT_NAME)
   onCampaignQuestSubscription(
     @MessageBody() msg: CampaignQuestsDto,
-  ): Observable<WsResponse<InstagramQuest>> {
-    const channelId = InstagramRedisService.createCampaignQuestsChannelName(
-      msg.campaignId,
+  ): Observable<WsResponse<any>> {
+    this.logger.debug(`onCampaignQuestSubscription ${msg.campaignId}`);
+    const subscriptionId = uuid();
+    const stop$ = merge(
+      this.redis.getUnassignedQuestKeys().pipe(
+        scan((acc, _) => acc + 1, 0),
+        filter(_ => _ > 3),
+        mapTo(true),
+      ),
+      timer(SchedulerService.SCHEDULER_TICK_INTERVAL, 15000).pipe(
+        mergeMap(_ =>
+          from(
+            Promise.all([
+              this.redis.getSubscriptionSentQuestsCount(subscriptionId),
+              this.redis.getSubscriptionAssignedQuestsCount(subscriptionId),
+            ]),
+          ),
+        ),
+        filter(([sentCount, assignedCount]) => sentCount - assignedCount > 3),
+        mapTo(true),
+      ),
     );
-    this.logger.debug(`onCampaignQuestSubscription ${channelId}`);
-    return this.redis
-      .getInstagramQuests(msg.campaignId)
-      .pipe(map(quest => ({ event: QUESTS_EVENT_NAME, data: quest })));
+    return concat(
+      this.redis.getInstagramQuests(msg.campaignId).pipe(
+        map(quest => {
+          process.nextTick(async () => {
+            await this.redis.incSubscriptionSentQuestsCount(subscriptionId);
+          });
+          return {
+            event: QUESTS_EVENT_NAME,
+            data: [...quest, subscriptionId],
+          };
+        }),
+        takeUntil(stop$),
+      ),
+      of({ event: QUESTS_EVENT_NAME, data: 'end' }),
+    );
   }
 }

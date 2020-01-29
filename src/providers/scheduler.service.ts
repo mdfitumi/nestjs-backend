@@ -5,7 +5,7 @@ import { InstagramRedisService } from './instagram-redis.service';
 
 @Injectable()
 export class SchedulerService implements OnModuleInit {
-  private readonly SCHEDULER_TICK_INTERVAL = 20000;
+  public static readonly SCHEDULER_TICK_INTERVAL = 10000;
   private readonly WORKER_ID = 1;
   constructor(
     private readonly instagramStorage: InstagramStorageService,
@@ -32,6 +32,6 @@ export class SchedulerService implements OnModuleInit {
         }),
       );
     }
-    setTimeout(() => this.tick(), this.SCHEDULER_TICK_INTERVAL);
+    setTimeout(() => this.tick(), SchedulerService.SCHEDULER_TICK_INTERVAL);
   }
 }

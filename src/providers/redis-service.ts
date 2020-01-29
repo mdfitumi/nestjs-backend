@@ -1,5 +1,8 @@
-import { RedisOptions } from 'ioredis';
+import { RedisOptions, Redis } from 'ioredis';
 import { parse } from 'url';
+import { Observable, concat, defer, fromEvent } from 'rxjs';
+import { ignoreElements } from 'rxjs/operators';
+import { RedisFactoryService } from './redis-factory.service';
 
 export abstract class RedisService {
   public static parseOptions(options: string): RedisOptions {
@@ -29,9 +32,10 @@ export function subscribeToEvents<T>(
 }
 
 export function subscribeToEventsPattern<T>(
-  redis: Redis,
+  factory: RedisFactoryService,
   redisKeyPattern: string,
-): Observable<T> {
+): Observable<number | T> {
+  const redis = factory.create();
   return concat(
     defer(() => redis.psubscribe(redisKeyPattern)).pipe(ignoreElements()),
     fromEvent<T>(redis, 'message'),

@@ -61,7 +61,7 @@ export class InstagramController {
     this.logger.debug('campaignQuestAssign');
     const body = req.body as InstagramQuestAssignDto;
     const user = req.user as AuthzJwtPayload;
-    await this.redis.assignQuest(body.questId, user);
+    await this.redis.assignQuest(body.questId, body.subscriptionId!!, user);
   }
 
   @Post('/campaign/quest/complete')

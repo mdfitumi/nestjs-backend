@@ -43,7 +43,18 @@ export class InstagramRedisService {
     return `hero:${user.azp}:quest:${questId}`;
   }
 
-  async publishCampaignQuest(campaignId: number, quest: InstagramQuest) {
+  static createSubscriptionSentQuestsCountKey(subscriptionId: string) {
+    return `subcription:${subscriptionId}:sent_quests`;
+  }
+
+  static createAssignedQuestsCountKey(subscriptionId: string) {
+    return `subcription:${subscriptionId}:assigned_count`;
+  }
+
+  async publishCampaignQuest(
+    campaignId: number,
+    quest: Omit<InstagramQuest, 'questId'>,
+  ) {
     this.logger.debug(
       `publishCampaignQuest ${campaignId} ${JSON.stringify(quest)}`,
     );
@@ -60,12 +71,30 @@ export class InstagramRedisService {
     );
   }
 
-  getInstagramQuests(campaignId: number): Observable<InstagramQuest> {
+  getInstagramQuests(campaignId: number): Observable<string[]> {
     this.logger.debug(`getInstagramQuests ${campaignId}`);
     const channelId = InstagramRedisService.createCampaignQuestsChannelName(
       campaignId,
     );
     return subscribeToEvents(this.factory, channelId);
+  }
+
+  async incSubscriptionSentQuestsCount(subscriptionId: string) {
+    const key = InstagramRedisService.createSubscriptionSentQuestsCountKey(
+      subscriptionId,
+    );
+    const old = await this.redis.incr(key);
+    await this.redis.expire(key, 60 * 60 * 24);
+    return old;
+  }
+  async getSubscriptionSentQuestsCount(subscriptionId: string) {
+    return this.redis
+      .get(
+        InstagramRedisService.createSubscriptionSentQuestsCountKey(
+          subscriptionId,
+        ),
+      )
+      .then(countString => +countString!!);
   }
 
   getUnassignedQuestKeys(): Observable<string> {
@@ -77,7 +106,7 @@ export class InstagramRedisService {
   }
 
   async validateQuestSubmit(questId: string) {
-    const expirationKey = InstagramRedisService.createWaitingForAssignKey(
+    const expirationKey = InstagramRedisService.createWaitingForCompleteKey(
       questId,
     );
     const isWaiting = await this.redis.get(expirationKey);
@@ -90,10 +119,23 @@ export class InstagramRedisService {
     return 'ok';
   }
 
-  async assignQuest(questId: string, user: AuthzClientId) {
+  async assignQuest(
+    questId: string,
+    subscriptionId: string,
+    user: AuthzClientId,
+  ) {
     const assignWaitingKey = InstagramRedisService.createWaitingForAssignKey(
       questId,
     );
+    const isCompletedKey = InstagramRedisService.createWaitingForCompleteKey(
+      questId,
+    );
+    const isCompleted = await this.redis
+      .get(isCompletedKey)
+      .then(flag => flag === '1');
+    if (isCompleted) {
+      throw new Error('quest is completed');
+    }
     const questString = await this.redis.get(assignWaitingKey);
     if (!questString) {
       throw new Error('quest does not exists');
@@ -102,19 +144,30 @@ export class InstagramRedisService {
     if (isAssigned) {
       throw new Error('quest already assigned');
     }
-    await this.redis.del(assignWaitingKey);
     const quest = JSON.parse(questString) as InstagramQuest;
-    return this.redis.set(
-      InstagramRedisService.createUserQuestsKey(user, questId),
-      '1',
-      'EX',
-      quest.expireDurationSeconds,
-    );
+    await this.redis
+      .pipeline()
+      .del(assignWaitingKey)
+      .incr(InstagramRedisService.createAssignedQuestsCountKey(subscriptionId))
+      .set(
+        InstagramRedisService.createUserQuestsKey(user, questId),
+        '1',
+        'EX',
+        quest.expireDurationSeconds,
+      )
+      .set(isCompletedKey, '0', 'EX', quest.expireDurationSeconds)
+      .exec();
   }
 
   async isQuestOwner(user: AuthzClientId, questId: string) {
     return this.redis
       .get(InstagramRedisService.createUserQuestsKey(user, questId))
       .then(flag => flag === '1');
+  }
+
+  getSubscriptionAssignedQuestsCount(subscriptionId: string) {
+    return this.redis
+      .get(InstagramRedisService.createAssignedQuestsCountKey(subscriptionId))
+      .then(countString => +countString!!);
   }
 }
