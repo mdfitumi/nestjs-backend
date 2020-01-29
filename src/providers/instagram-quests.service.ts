@@ -24,6 +24,7 @@ const QUESTS_EVENT_NAME = 'quests';
 
 @WebSocketGateway()
 export class InstagramQuestsService {
+  private readonly UNASSIGNED_QUESTS_LIMIT = 3;
   constructor(
     private readonly redis: InstagramRedisService,
     private readonly logger: IcLogger,
@@ -40,7 +41,7 @@ export class InstagramQuestsService {
     const stop$ = merge(
       this.redis.getUnassignedQuestKeys().pipe(
         scan((acc, _) => acc + 1, 0),
-        filter(_ => _ > 3),
+        filter(_ => _ > this.UNASSIGNED_QUESTS_LIMIT),
         mapTo(true),
       ),
       timer(SchedulerService.SCHEDULER_TICK_INTERVAL, 15000).pipe(
@@ -52,7 +53,10 @@ export class InstagramQuestsService {
             ]),
           ),
         ),
-        filter(([sentCount, assignedCount]) => sentCount - assignedCount > 3),
+        filter(
+          ([sentCount, assignedCount]) =>
+            sentCount - assignedCount > this.UNASSIGNED_QUESTS_LIMIT,
+        ),
         mapTo(true),
       ),
     );
