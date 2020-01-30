@@ -7,11 +7,11 @@ import {
 } from 'typeorm';
 
 export class PublicUserTable1578035934083 implements MigrationInterface {
-  private readonly tableName = 'public.users';
+  public static readonly tableName = 'public.users';
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.createTable(
       new Table({
-        name: this.tableName,
+        name: PublicUserTable1578035934083.tableName,
         columns: [
           new TableColumn({
             name: 'id',
@@ -70,25 +70,28 @@ export class PublicUserTable1578035934083 implements MigrationInterface {
       true,
       true,
     );
-    await queryRunner.createForeignKeys(this.tableName, [
-      new TableForeignKey({
-        columnNames: ['referrerId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: this.tableName,
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE',
-      }),
-      new TableForeignKey({
-        columnNames: ['currencyId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'public.currency',
-        onDelete: 'SET DEFAULT',
-        onUpdate: 'CASCADE',
-      }),
-    ]);
+    await queryRunner.createForeignKeys(
+      PublicUserTable1578035934083.tableName,
+      [
+        new TableForeignKey({
+          columnNames: ['referrerId'],
+          referencedColumnNames: ['id'],
+          referencedTableName: PublicUserTable1578035934083.tableName,
+          onDelete: 'SET NULL',
+          onUpdate: 'CASCADE',
+        }),
+        new TableForeignKey({
+          columnNames: ['currencyId'],
+          referencedColumnNames: ['id'],
+          referencedTableName: 'public.currency',
+          onDelete: 'SET DEFAULT',
+          onUpdate: 'CASCADE',
+        }),
+      ],
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    return queryRunner.dropTable(this.tableName);
+    return queryRunner.dropTable(PublicUserTable1578035934083.tableName);
   }
 }

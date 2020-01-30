@@ -1,5 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+export type InstagramCampaignId = number;
+
 @Entity({
   name: 'instagram.campaign',
 })

@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner, Table, TableColumn } from 'typeorm';
 
 export class InstagramCampaignTable1578040089815 implements MigrationInterface {
-  private readonly tableName = 'instagram.campaign';
+  public static readonly tableName = 'instagram.campaign';
   public async up(queryRunner: QueryRunner): Promise<any> {
     return queryRunner.createTable(
       new Table({
-        name: this.tableName,
+        name: InstagramCampaignTable1578040089815.tableName,
         columns: [
           new TableColumn({
             name: 'id',
@@ -65,6 +65,6 @@ export class InstagramCampaignTable1578040089815 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    return queryRunner.dropTable(this.tableName);
+    return queryRunner.dropTable(InstagramCampaignTable1578040089815.tableName);
   }
 }

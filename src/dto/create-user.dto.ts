@@ -1,4 +1,4 @@
-import { UserEntity, CurrencyEntity } from 'src/entities';
+import { CurrencyEntity } from 'src/entities';
 
 export class CreateUserDto {
   displayName: string;

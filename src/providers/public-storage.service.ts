@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CurrencyEntity, ServerEntity, UserEntity } from 'src/entities';
+import { CurrencyEntity, ServerEntity, PublicUserEntity } from 'src/entities';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto';
 import { IcLogger } from './logger';
@@ -12,8 +12,8 @@ export class PublicStorageService {
     private currencyRepo: Repository<CurrencyEntity>,
     @InjectRepository(ServerEntity)
     private serverRepo: Repository<ServerEntity>,
-    @InjectRepository(UserEntity)
-    private usersRepo: Repository<UserEntity>,
+    @InjectRepository(PublicUserEntity)
+    private usersRepo: Repository<PublicUserEntity>,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('PublicStorageService');
@@ -26,12 +26,12 @@ export class PublicStorageService {
     return this.usersRepo.save(entity);
   }
 
-  async deleteAccount(account: Partial<UserEntity>) {
+  async deleteAccount(account: Partial<PublicUserEntity>) {
     this.logger.debug(`deleteAccount ${JSON.stringify(account)}`);
     return this.usersRepo.delete(account);
   }
 
-  async getAccount(account: Partial<UserEntity>) {
+  async getAccount(account: Partial<PublicUserEntity>) {
     this.logger.debug(`getAccount ${JSON.stringify(account)}`);
     return this.usersRepo.findOne(account);
   }

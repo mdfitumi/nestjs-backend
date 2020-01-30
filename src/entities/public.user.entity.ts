@@ -3,16 +3,16 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+export type PublicUserId = number;
+
 @Entity({
   name: 'public.users',
 })
-export class UserEntity {
+export class PublicUserEntity {
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
@@ -24,11 +24,11 @@ export class UserEntity {
   @Column({ type: 'json', default: "'[]'::jsonb" })
   roles: any;
   @OneToOne(
-    () => UserEntity,
+    () => PublicUserEntity,
     source => source.referrer,
   )
   @JoinColumn({ name: 'referrerId' })
-  referrer: UserEntity;
+  referrer: PublicUserEntity;
   @Column()
   referrerId: number;
   @Column()

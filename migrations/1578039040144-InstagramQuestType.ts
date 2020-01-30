@@ -1,12 +1,12 @@
 import { MigrationInterface, QueryRunner, Table, TableColumn } from 'typeorm';
 
 export class InstagramQuestType1578039040144 implements MigrationInterface {
-  private readonly tableName = 'instagram.quest_type';
+  public static readonly tableName = 'instagram.quest_type';
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     return queryRunner.createTable(
       new Table({
-        name: this.tableName,
+        name: InstagramQuestType1578039040144.tableName,
         columns: [
           new TableColumn({
             name: 'id',
@@ -27,6 +27,6 @@ export class InstagramQuestType1578039040144 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    return queryRunner.dropTable(this.tableName);
+    return queryRunner.dropTable(InstagramQuestType1578039040144.tableName);
   }
 }

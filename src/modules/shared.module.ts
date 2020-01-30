@@ -7,7 +7,7 @@ import {
   CurrencyEntity,
   InstagramEntity,
   ServerEntity,
-  UserEntity,
+  PublicUserEntity,
   InstagramActiveCampaignEntity,
 } from '../entities';
 
@@ -17,7 +17,7 @@ const entities = [
   CurrencyEntity,
   InstagramEntity,
   ServerEntity,
-  UserEntity,
+  PublicUserEntity,
   InstagramActiveCampaignEntity,
 ];
 

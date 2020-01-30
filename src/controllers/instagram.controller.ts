@@ -8,7 +8,11 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { InstagramStorageService, InstagramRedisService } from '../providers';
+import {
+  InstagramStorageService,
+  InstagramRedisService,
+  PublicStorageService,
+} from '../providers';
 import { IcLogger } from '../providers/logger';
 import {
   CreateInstagramDto,
@@ -20,12 +24,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { AuthzJwtPayload } from '../interfaces/authz-jwt-payload';
 import { InstagramQuestAssignDto } from '../dto/instagram-quest-assign.dto';
+import { ValidateQuestSubmitResult } from 'src/interfaces';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('instagram')
 export class InstagramController {
   constructor(
-    private readonly instagramService: InstagramStorageService,
+    private readonly instagramStorage: InstagramStorageService,
+    private readonly publicStorage: PublicStorageService,
     private readonly redis: InstagramRedisService,
     private readonly logger: IcLogger,
   ) {
@@ -35,19 +41,19 @@ export class InstagramController {
   @Post()
   async createAccount(@Body() account: CreateInstagramDto) {
     this.logger.debug('createAccount');
-    return this.instagramService.addAccount(account);
+    return this.instagramStorage.addAccount(account);
   }
 
   @Delete()
   async deleteAccount(@Body() accountId: number) {
     this.logger.debug('deleteAccount');
-    return this.instagramService.deleteAccount({ id: accountId });
+    return this.instagramStorage.deleteAccount({ id: accountId });
   }
 
   @Post('/campaign')
   async createCampaign(@Body() campaign: CreateInstagramCampaignDto) {
     this.logger.debug('createCampaign');
-    return this.instagramService.addCampaign(campaign);
+    return this.instagramStorage.addCampaign(campaign);
   }
 
   @Post('/campaign/quest')
@@ -71,7 +77,17 @@ export class InstagramController {
     const user = req.user as AuthzJwtPayload;
     const isQuestOwner = await this.redis.isQuestOwner(user, body.questId);
     if (isQuestOwner) {
-      return this.redis.validateQuestSubmit(body.questId);
+      // const [quest, submitResult] = await this.redis.validateQuestSubmit(
+      //   body.questId,
+      // );
+      // switch (submitResult) {
+      //   case ValidateQuestSubmitResult.Ok:
+      //     const [publicUser, campaign] = await Promise.all([this.publicStorage.getAccount({
+      //       auth0id: user.azp,
+      //     }, this.instagramStorage.getCampaign({id: 0})]);
+      //     await this.instagramStorage.saveCompletedQuest(user.azp);
+      //     break;
+      // }
     }
     throw new Error('not quest owner');
   }
@@ -79,7 +95,7 @@ export class InstagramController {
   @Get('/campaign/:id')
   async showCampaign(@Param('id') campaignId: number) {
     this.logger.debug('showCampaign');
-    return this.instagramService.getCampaign(campaignId);
+    return this.instagramStorage.getCampaign(campaignId);
   }
 
   @Get('/validate-campaign-subscription')
