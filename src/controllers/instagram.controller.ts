@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { omit } from 'lodash';
 import {
   InstagramStorageService,
   InstagramRedisService,
@@ -90,11 +91,12 @@ export class InstagramController {
             auth0id: user.azp,
           });
           this.logger.debug(`campaignQuestComplete userId ${publicUser?.id}`);
-          await this.instagramStorage.saveCompletedQuest(
-            publicUser!!.id,
-            campaignId!!,
-          );
-          return;
+          return this.instagramStorage
+            .saveCompletedQuest(publicUser!!.id, campaignId!!)
+            .then(completedQuest => ({
+              status: 'ok',
+              data: omit(completedQuest, ['id']),
+            }));
         case ValidateQuestSubmitResult.Expired:
           return { status: 'err', message: 'quest expired' };
       }
