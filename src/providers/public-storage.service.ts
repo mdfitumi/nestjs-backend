@@ -35,4 +35,9 @@ export class PublicStorageService {
     this.logger.debug(`getAccount ${JSON.stringify(account)}`);
     return this.usersRepo.findOne(account);
   }
+
+  async getAccountByAuthzId(authzId: string) {
+    this.logger.debug(`getAccountByAuthzId ${authzId}`);
+    return this.usersRepo.findOne({ auth0id: authzId }, { cache: true });
+  }
 }

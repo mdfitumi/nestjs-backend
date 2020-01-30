@@ -87,9 +87,9 @@ export class InstagramController {
       );
       switch (submitResult) {
         case ValidateQuestSubmitResult.Ok:
-          const publicUser = await this.publicStorage.getAccount({
-            auth0id: user.azp,
-          });
+          const publicUser = await this.publicStorage.getAccountByAuthzId(
+            user.azp,
+          );
           this.logger.debug(`campaignQuestComplete userId ${publicUser?.id}`);
           return this.instagramStorage
             .saveCompletedQuest(publicUser!!.id, campaignId!!)
