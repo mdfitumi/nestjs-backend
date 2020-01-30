@@ -176,4 +176,16 @@ export class InstagramRedisService {
       .get(InstagramRedisService.createAssignedQuestsCountKey(subscriptionId))
       .then(countString => +countString!!);
   }
+
+  async cleanupSubscriptionData(subscriptionId: string) {
+    return this.redis
+      .pipeline()
+      .del(
+        InstagramRedisService.createSubscriptionSentQuestsCountKey(
+          subscriptionId,
+        ),
+      )
+      .del(InstagramRedisService.createAssignedQuestsCountKey(subscriptionId))
+      .exec();
+  }
 }

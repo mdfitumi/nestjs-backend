@@ -12,6 +12,7 @@ import {
   mapTo,
   mergeMap,
   takeUntil,
+  finalize,
 } from 'rxjs/operators';
 import { Observable, timer, merge, from, concat, of } from 'rxjs';
 import * as uuid from 'uuid-random';
@@ -72,6 +73,9 @@ export class InstagramQuestsService {
           };
         }),
         takeUntil(stop$),
+        finalize(
+          async () => await this.redis.cleanupSubscriptionData(subscriptionId),
+        ),
       ),
       of({ event: QUESTS_EVENT_NAME, data: 'end' }),
     );
