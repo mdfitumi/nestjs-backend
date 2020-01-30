@@ -9,20 +9,29 @@ import {
 import { Repository } from 'typeorm';
 import { CreateInstagramDto, CreateInstagramCampaignDto } from '../dto';
 import { IcLogger } from './logger';
+import { PublicUserId } from '../entities/public.user.entity';
+import { InstagramCompletedQuestEntity } from '../entities/instagram.completed-quest.entity';
+import { InstagramCampaignId } from '../entities/instagram.campaign.entity';
 
 @Injectable()
 export class InstagramStorageService {
   constructor(
     @InjectRepository(InstagramEntity)
-    private instagramRepo: Repository<InstagramEntity>,
+    private readonly instagramRepo: Repository<InstagramEntity>,
     @InjectRepository(InstagramCampaignEntity)
-    private instagramCampaignRepo: Repository<InstagramCampaignEntity>,
+    private readonly instagramCampaignRepo: Repository<InstagramCampaignEntity>,
     @InjectRepository(InstagramActiveCampaignEntity)
-    private instagramActiveCampaignRepo: Repository<
+    private readonly instagramActiveCampaignRepo: Repository<
       InstagramActiveCampaignEntity
     >,
     @InjectRepository(InstagramQuestTypeEntity)
-    private instagramQuestTypeRepo: Repository<InstagramQuestTypeEntity>,
+    private readonly instagramQuestTypeRepo: Repository<
+      InstagramQuestTypeEntity
+    >,
+    @InjectRepository(InstagramCompletedQuestEntity)
+    private readonly completedQuestsRepo: Repository<
+      InstagramCompletedQuestEntity
+    >,
     private readonly logger: IcLogger,
   ) {
     this.logger.setContext('InstagramStorageService');
@@ -61,5 +70,18 @@ export class InstagramStorageService {
   async getActiveCampaigns(workerId: number) {
     this.logger.debug(`getActiveCampaigns ${workerId.toString()}`);
     return this.instagramActiveCampaignRepo.find({ workerId });
+  }
+
+  async saveCompletedQuest(
+    userId: PublicUserId,
+    campaignId: InstagramCampaignId,
+  ) {
+    this.logger.debug(`saveCompletedQuest ${userId} ${campaignId}`);
+    const entity = this.completedQuestsRepo.create({
+      userId,
+      campaignId,
+      rewardAmount: 100.0,
+    });
+    return this.completedQuestsRepo.save(entity);
   }
 }

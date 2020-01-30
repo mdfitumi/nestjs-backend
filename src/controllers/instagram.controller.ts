@@ -72,24 +72,34 @@ export class InstagramController {
 
   @Post('/campaign/quest/complete')
   async campaignQuestComplete(@Req() req: Request) {
-    this.logger.debug('campaignQuestComplete');
     const body = req.body as SubmitQuestDto;
     const user = req.user as AuthzJwtPayload;
+    this.logger.debug(`campaignQuestComplete`);
     const isQuestOwner = await this.redis.isQuestOwner(user, body.questId);
     if (isQuestOwner) {
-      // const [quest, submitResult] = await this.redis.validateQuestSubmit(
-      //   body.questId,
-      // );
-      // switch (submitResult) {
-      //   case ValidateQuestSubmitResult.Ok:
-      //     const [publicUser, campaign] = await Promise.all([this.publicStorage.getAccount({
-      //       auth0id: user.azp,
-      //     }, this.instagramStorage.getCampaign({id: 0})]);
-      //     await this.instagramStorage.saveCompletedQuest(user.azp);
-      //     break;
-      // }
+      const [campaignId, submitResult] = await Promise.all([
+        this.redis.getQuestCampaignId(body.questId),
+        this.redis.validateQuestSubmit(body.questId),
+      ]);
+      this.logger.debug(
+        `campaignQuestComplete campaignId ${campaignId} submitResult ${submitResult}`,
+      );
+      switch (submitResult) {
+        case ValidateQuestSubmitResult.Ok:
+          const publicUser = await this.publicStorage.getAccount({
+            auth0id: user.azp,
+          });
+          this.logger.debug(`campaignQuestComplete userId ${publicUser?.id}`);
+          await this.instagramStorage.saveCompletedQuest(
+            publicUser!!.id,
+            campaignId!!,
+          );
+          return;
+        case ValidateQuestSubmitResult.Expired:
+          return { status: 'err', message: 'quest expired' };
+      }
     }
-    throw new Error('not quest owner');
+    return { status: 'err', message: 'not quest owner' };
   }
 
   @Get('/campaign/:id')

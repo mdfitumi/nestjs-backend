@@ -7,6 +7,7 @@ import { map, filter } from 'rxjs/operators';
 import { InstagramQuest, AuthzClientId } from '../interfaces';
 import * as uuid from 'uuid-random';
 import { subscribeToEvents, subscribeToEventsPattern } from './redis-service';
+import { ValidateQuestSubmitResult } from '../interfaces/instagram-quest';
 
 const REDIS_HOUR = 60 * 60;
 
@@ -41,6 +42,10 @@ export class InstagramRedisService {
     return `quest:${questId}:wfc`;
   }
 
+  static createQuestIdToCampaignIdKey(questId: string) {
+    return `questId:${questId}:campaignId`;
+  }
+
   static createUserQuestsKey(user: AuthzClientId, questId: string) {
     return `hero:${user.azp}:quest:${questId}`;
   }
@@ -61,12 +66,21 @@ export class InstagramRedisService {
       `publishCampaignQuest ${campaignId} ${JSON.stringify(quest)}`,
     );
     const questId = uuid();
-    await this.redis.set(
-      InstagramRedisService.createWaitingForAssignKey(questId),
-      JSON.stringify(quest),
-      'EX',
-      quest.expireDurationSeconds,
-    );
+    await this.redis
+      .pipeline()
+      .set(
+        InstagramRedisService.createWaitingForAssignKey(questId),
+        JSON.stringify(quest),
+        'EX',
+        quest.expireDurationSeconds,
+      )
+      .set(
+        InstagramRedisService.createQuestIdToCampaignIdKey(questId),
+        campaignId,
+        'EX',
+        quest.expireDurationSeconds * 2,
+      )
+      .exec();
     return this.redis.publish(
       InstagramRedisService.createCampaignQuestsChannelName(campaignId),
       JSON.stringify({ questId, ...quest }),
@@ -119,6 +133,12 @@ export class InstagramRedisService {
     this.logger.debug(`validateQuestSubmit ${questId} ok`);
     await this.redis.del(expirationKey);
     return ValidateQuestSubmitResult.Ok;
+  }
+
+  async getQuestCampaignId(questId: string) {
+    return this.redis
+      .get(InstagramRedisService.createQuestIdToCampaignIdKey(questId))
+      .then(idString => (idString ? +idString : null));
   }
 
   async assignQuest(

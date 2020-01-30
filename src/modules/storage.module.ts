@@ -10,6 +10,7 @@ import {
   ServerEntity,
   PublicUserEntity,
   InstagramActiveCampaignEntity,
+  InstagramCompletedQuestEntity,
 } from '../entities';
 
 const entities = [
@@ -20,6 +21,7 @@ const entities = [
   ServerEntity,
   PublicUserEntity,
   InstagramActiveCampaignEntity,
+  InstagramCompletedQuestEntity,
 ];
 
 // nestjs cannot properly read ormconfig.js file, so db is not working
@@ -37,6 +39,7 @@ const ormConfig: TypeOrmModuleOptions | undefined =
         migrations: ['migrations'],
         synchronize: false,
         cache: true,
+        logging: ['query'],
       };
 @Module({
   imports: [
