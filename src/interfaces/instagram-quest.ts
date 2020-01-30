@@ -8,3 +8,8 @@ export interface InstagramQuest {
 export interface InstagramQuestEvent extends InstagramQuest {
   subscriptionId: string;
 }
+
+export enum ValidateQuestSubmitResult {
+  Ok,
+  Expired,
+}

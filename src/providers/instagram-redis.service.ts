@@ -114,11 +114,11 @@ export class InstagramRedisService {
     const isWaiting = await this.redis.get(expirationKey);
     if (!isWaiting) {
       this.logger.debug(`validateQuestSubmit ${questId} expired`);
-      return 'expired';
+      return ValidateQuestSubmitResult.Expired;
     }
     this.logger.debug(`validateQuestSubmit ${questId} ok`);
     await this.redis.del(expirationKey);
-    return 'ok';
+    return ValidateQuestSubmitResult.Ok;
   }
 
   async assignQuest(
