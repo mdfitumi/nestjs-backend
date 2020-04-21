@@ -5,7 +5,7 @@ import { IcLogger } from './logger';
 import { RedisFactoryService } from './redis-factory.service';
 import { map, filter } from 'rxjs/operators';
 import { InstagramQuest, AuthzClientId } from '../interfaces';
-import * as uuid from 'uuid-random';
+import uuid from 'uuid-random';
 import { subscribeToEvents, subscribeToEventsPattern } from './redis-service';
 import { ValidateQuestSubmitResult } from '../interfaces/instagram-quest';
 

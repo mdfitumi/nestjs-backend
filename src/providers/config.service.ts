@@ -11,10 +11,10 @@ export class ConfigService {
   private readonly envConfig: EnvConfig;
 
   constructor(@Inject(CONFIG_OPTIONS) private options: ConfigModuleOptions) {
-    this.envConfig = ConfigService.readConfig(
-      options.folder,
-      ConfigService.envFileName,
-    );
+    // this.envConfig = ConfigService.readConfig(
+    //   options.folder,
+    //   ConfigService.envFileName,
+    // );
   }
 
   public static get envFileName() {
@@ -38,6 +38,6 @@ export class ConfigService {
   }
 
   get env() {
-    return this.envConfig;
+    return (process.env as unknown) as EnvConfig;
   }
 }

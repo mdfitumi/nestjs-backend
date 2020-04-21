@@ -15,7 +15,7 @@ import {
   finalize,
 } from 'rxjs/operators';
 import { Observable, timer, merge, from, concat, of } from 'rxjs';
-import * as uuid from 'uuid-random';
+import uuid from 'uuid-random';
 import { IcLogger } from './logger';
 import { InstagramRedisService } from './instagram-redis.service';
 import { CampaignQuestsDto } from '../dto/campaign-quests.dto';
